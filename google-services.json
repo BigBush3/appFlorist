@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "225495261253",
+    "project_id": "floracurrier",
+    "storage_bucket": "floracurrier.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:225495261253:android:827037da28d70596bd432c",
+        "android_client_info": {
+          "package_name": "ru.ibmcurr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "225495261253-4rdjaqbtqnv5966k76odd1dp9tjmq4j0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKpFqRLCOIMFPZtU6nLY-ktUsc08_LTfA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "225495261253-4rdjaqbtqnv5966k76odd1dp9tjmq4j0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
