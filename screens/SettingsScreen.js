@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   BackHandler,
   Dimensions,
@@ -11,25 +11,26 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
-import UiButtonGreen from '../components/ui/button/ButtonGreen.js';
-import UiButtonGreenOutline from '../components/ui/button/ButtonGreenOutline.js';
-import UiHeader from '../components/ui/header/Header.js';
-import UiTextInput from '../components/ui/form/TextInput.js';
+import UiButtonGreen from "../components/ui/button/ButtonGreen.js";
+import UiButtonGreenOutline from "../components/ui/button/ButtonGreenOutline.js";
+import UiHeader from "../components/ui/header/Header.js";
+import UiTextInput from "../components/ui/form/TextInput.js";
 import TabBarIcon from "../components/TabBarIcon.js";
-import { isIphoneX } from '../components/isIphoneX.js';
+import { isIphoneX } from "../components/isIphoneX.js";
 
-import Colors from '../constants/Colors.js';
+import Colors from "../constants/Colors.js";
 
-import { storeData, retrieveData } from '../services/Storage.js'
+import { storeData, retrieveData } from "../services/Storage.js";
 
-
-const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
+const { width: viewportWidth, height: viewportHeight } =
+  Dimensions.get("window");
 const statusBarX = isIphoneX() ? 44 : 20;
 //const statusBarIndent = Platform.OS === 'ios' ? statusBarX : StatusBar.currentHeight;
-const statusBarIndent = Platform.OS === 'ios' ? statusBarX : 0;
-const statusHeight = Platform.OS === 'ios' ? statusBarX : StatusBar.currentHeight;
+const statusBarIndent = Platform.OS === "ios" ? statusBarX : 0;
+const statusHeight =
+  Platform.OS === "ios" ? statusBarX : StatusBar.currentHeight;
 const contentHeight = viewportHeight - statusHeight - 56 - 56;
 
 export default class SettingScreen extends React.Component {
@@ -40,28 +41,28 @@ export default class SettingScreen extends React.Component {
   state = {
     settings: {
       keyboardType: 0,
-      leftItems: 0
-    }
-  }
+      leftItems: 0,
+    },
+  };
 
   componentDidMount() {
- 
     this.load();
     this.props.navigation.addListener("willFocus", this.load);
   }
 
   load = () => {
-    retrieveData("fl_settings").then((data)=>{ 
-      if(data){ 
-        if(data !== null && typeof data !==  undefined) this.setState({settings: data})
+    retrieveData("fl_settings").then((data) => {
+      if (data) {
+        if (data !== null && typeof data !== undefined)
+          this.setState({ settings: data });
       }
-    })
-  }
+    });
+  };
 
-  save(_k, _v){
+  save(_k, _v) {
     let d = this.state.settings;
-    d[_k] = _v ;
-    this.setState({ settings: d});
+    d[_k] = _v;
+    this.setState({ settings: d });
     storeData("fl_settings", d);
   }
 
@@ -70,55 +71,76 @@ export default class SettingScreen extends React.Component {
     return (
       <View style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
-          <UiHeader
-            headerText="Настройки"
-          />
+          <UiHeader headerText="Настройки" />
           <KeyboardAvoidingView
             style={styles.content}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-            enabled={Platform.OS === 'ios'}
+            behavior={Platform.OS === "ios" ? "padding" : "padding"}
+            enabled={Platform.OS === "ios"}
           >
-            {this.state.settings ? 
-            <ScrollView
-              contentContainerStyle={styles.scrollContent}
-              keyboardDismissMode="on-drag"
-              keyboardShouldPersistTaps="handled"
-            >
-              <Text style={styles.message}>Тип отображаемой клавиатуры</Text>
-              <View style={styles.form}>
-
-              {/*  <UiTextInput keyboardType="numeric" /> */}
-              {this.state.settings.keyboardType == 0 ?
-                  <UiButtonGreen gButtonText="Показывать цифровую" onPress={() => this.save("keyboardType", 0)} />
-                  :
-                  <UiButtonGreenOutline gOButtonText="Показывать цифровую" onPress={() => this.save("keyboardType", 0)}/>
-                }
-                 {this.state.settings.keyboardType == 1 ?
-                  <UiButtonGreen gButtonText="Показывать  полную клавиатуру" onPress={() => this.save("keyboardType", 1)} />
-                  :
-                  <UiButtonGreenOutline gOButtonText="Показывать  полную клавиатуру" onPress={() => this.save("keyboardType", 1)}/>
-                }
-
-              </View>
-              <Text style={styles.message}></Text>
-              <View style={styles.form}>
-                {this.state.settings.leftItems == 0 ?
-                  <UiButtonGreen gButtonText="Показывать остаток товара" onPress={() => this.save("leftItems", 0)} />
-                  :
-                  <UiButtonGreenOutline gOButtonText="Показывать остаток товара" onPress={() => this.save("leftItems", 0)}/>
-                }
-                 {this.state.settings.leftItems == 1 ?
-                  <UiButtonGreen gButtonText="Показывать товар только с остатком" onPress={() => this.save("leftItems", 1)} />
-                  :
-                  <UiButtonGreenOutline gOButtonText="Показывать товар только с остатком" onPress={() => this.save("leftItems", 1)}/>
-                }
-                 {/*this.state.settings.leftItems == 2 ?
+            {this.state.settings ? (
+              <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                keyboardDismissMode="on-drag"
+                keyboardShouldPersistTaps="handled"
+              >
+                <Text style={styles.message}>Тип отображаемой клавиатуры</Text>
+                <View style={styles.form}>
+                  {/*  <UiTextInput keyboardType="numeric" /> */}
+                  {this.state.settings.keyboardType == 0 ? (
+                    <UiButtonGreen
+                      gButtonText="Показывать цифровую"
+                      onPress={() => this.save("keyboardType", 0)}
+                    />
+                  ) : (
+                    <UiButtonGreenOutline
+                      gOButtonText="Показывать цифровую"
+                      onPress={() => this.save("keyboardType", 0)}
+                    />
+                  )}
+                  {this.state.settings.keyboardType == 1 ? (
+                    <UiButtonGreen
+                      gButtonText="Показывать  полную клавиатуру"
+                      onPress={() => this.save("keyboardType", 1)}
+                    />
+                  ) : (
+                    <UiButtonGreenOutline
+                      gOButtonText="Показывать  полную клавиатуру"
+                      onPress={() => this.save("keyboardType", 1)}
+                    />
+                  )}
+                </View>
+                <Text style={styles.message}></Text>
+                <View style={styles.form}>
+                  {this.state.settings.leftItems == 0 ? (
+                    <UiButtonGreen
+                      gButtonText="Показывать остаток товара"
+                      onPress={() => this.save("leftItems", 0)}
+                    />
+                  ) : (
+                    <UiButtonGreenOutline
+                      gOButtonText="Показывать остаток товара"
+                      onPress={() => this.save("leftItems", 0)}
+                    />
+                  )}
+                  {this.state.settings.leftItems == 1 ? (
+                    <UiButtonGreen
+                      gButtonText="Показывать товар только с остатком"
+                      onPress={() => this.save("leftItems", 1)}
+                    />
+                  ) : (
+                    <UiButtonGreenOutline
+                      gOButtonText="Показывать товар только с остатком"
+                      onPress={() => this.save("leftItems", 1)}
+                    />
+                  )}
+                  {/*this.state.settings.leftItems == 2 ?
                   <UiButtonGreen gButtonText="Показывать резерв товара" onPress={() => this.save("leftItems", 2)} />
                   :
                   <UiButtonGreenOutline gOButtonText="Показывать резерв товара" onPress={() => this.save("leftItems", 2)}/>
               */}
-              </View>
-            </ScrollView> : null}
+                </View>
+              </ScrollView>
+            ) : null}
           </KeyboardAvoidingView>
 
           <View style={styles.tabs}>
@@ -127,7 +149,7 @@ export default class SettingScreen extends React.Component {
               style={styles.tabButton}
             >
               <TabBarIcon
-              size={25}
+                size={25}
                 color={Colors.darkGrayColor}
                 name="checkmark-circle-outline"
               />
@@ -142,7 +164,11 @@ export default class SettingScreen extends React.Component {
               onPress={() => navigate("Orders")}
               style={styles.tabButton}
             >
-              <TabBarIcon size={25} color={Colors.darkGrayColor} name="md-list-outline" />
+              <TabBarIcon
+                size={25}
+                color={Colors.darkGrayColor}
+                name="list-outline"
+              />
               <Text
                 style={[styles.tabButtonText, { color: Colors.darkGrayColor }]}
               >
@@ -161,9 +187,7 @@ export default class SettingScreen extends React.Component {
                 Настройки
               </Text>
             </TouchableOpacity>
-
           </View>
-
         </SafeAreaView>
       </View>
     );
@@ -184,7 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.whiteColor,
   },
   scrollContent: {
-    width: '100%',
+    width: "100%",
     minHeight: contentHeight,
     paddingVertical: 16,
   },
@@ -192,11 +216,11 @@ const styles = StyleSheet.create({
   message: {
     paddingHorizontal: 16,
     paddingVertical: 16,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 16,
     lineHeight: 22,
     color: Colors.darkGrayColor,
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
   },
 
   form: {
@@ -228,5 +252,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 20,
   },
-
 });

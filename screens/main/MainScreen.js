@@ -18,8 +18,8 @@ import UiProductCard from "../../components/ui/cards/ProductCard.js";
 
 import Colors from "../../constants/Colors.js";
 
-import { formatDateSQL } from '../../components/common/Date.js';
-import { retrieveData, Access, storeData } from '../../services/Storage.js'
+import { formatDateSQL } from "../../components/common/Date.js";
+import { retrieveData, Access, storeData } from "../../services/Storage.js";
 import { getList, open } from "../../services/Bouquet";
 
 export default class MainScreen extends React.Component {
@@ -41,7 +41,6 @@ export default class MainScreen extends React.Component {
   };
 
   componentDidMount() {
-
     this.load();
     this.props.navigation.addListener("willFocus", this.load);
   }
@@ -52,17 +51,22 @@ export default class MainScreen extends React.Component {
 
   load = () => {
     retrieveData("user_access").then((_access) => {
-      if (_access) this.setState({ access: _access })
-    })
-    retrieveData('network').then((net) => {
+      if (_access) this.setState({ access: _access });
+    });
+    retrieveData("network").then((net) => {
       this.setState({ network: net });
       if (this.state.bouquetList.length == 0) this.setState({ loader: true });
       getList(net.ip).then((res) => {
         //console.log(res.result.sort((a, b) =>  new Date(a.OPENTIME) - new Date(b.OPENTIME)));
-        if (res.result) this.setState({ bouquetList: res.result.sort((a, b) => new Date(a.OPENTIME) - new Date(b.OPENTIME)), loader: false });
-      })
-    })
-
+        if (res.result)
+          this.setState({
+            bouquetList: res.result.sort(
+              (a, b) => new Date(a.OPENTIME) - new Date(b.OPENTIME)
+            ),
+            loader: false,
+          });
+      });
+    });
 
     BackHandler.addEventListener("hardwareBackPress", () => {
       this.props.navigation.navigate("Main");
@@ -72,26 +76,24 @@ export default class MainScreen extends React.Component {
 
   openBouquet(_id, _photo) {
     open(this.state.network.ip, _id).then((res) => {
-      console.log( 
-        "OPEN", 
-        res.result[0], 
-        res.result[0]["KOMPLEKTCHECKITEMID"]
-      );
-      
-      if (res.result[0]["OPERATIONID"] == 133) Alert.alert("Букет уже добавлен в чек"); else if (res.result[0]["OPERATIONID"] == 132) {
+      console.log("OPEN", res.result[0], res.result[0]["KOMPLEKTCHECKITEMID"]);
+
+      if (res.result[0]["OPERATIONID"] == 133)
+        Alert.alert("Букет уже добавлен в чек");
+      else if (res.result[0]["OPERATIONID"] == 132) {
         Alert.alert("Букет уже продан");
-      } else if (res.result[0]["OPERATIONID"] == 513) Alert.alert("Букет расформирован"); else {
+      } else if (res.result[0]["OPERATIONID"] == 513)
+        Alert.alert("Букет расформирован");
+      else {
         storeData("productItem", {
           checkid: _id,
           komplektcheckitemid: res.result[0]["KOMPLEKTCHECKITEMID"],
           name: res.result[0]["CHECKNAME"],
-          photo: _photo
-        }); 
+          photo: _photo,
+        });
         this.props.navigation.navigate("Product");
-        
       }
-
-    })
+    });
   }
 
   render() {
@@ -102,24 +104,33 @@ export default class MainScreen extends React.Component {
         <UiProductCard
           key={index}
           onPress={() => this.openBouquet(item.CHECKID, item.FOTO)}
-          image={{ uri: `http://${this.state.network.ip}/ibm/public/images/${item.FOTO}` }}
-          date={formatDateSQL(item.OPENTIME)[0] + " " + formatDateSQL(item.OPENTIME)[1]}
+          image={{
+            uri: `http://${this.state.network.ip}/ibm/public/images/${item.FOTO}`,
+          }}
+          date={
+            formatDateSQL(item.OPENTIME)[0] +
+            " " +
+            formatDateSQL(item.OPENTIME)[1]
+          }
           price={item.TOTAL}
           title={item.NAME}
         />
-      )
-    })
+      );
+    });
     return (
       <View style={styles.container}>
-        <UiHeader headerText="Собранные букеты" />
         <SafeAreaView style={styles.safeArea}>
+          <UiHeader headerText="Собранные букеты" />
           <View style={styles.content}>
             <ScrollView
               contentContainerStyle={{ paddingVertical: 16 }}
               style={styles.scrollView}
             >
-              {this.state.access.enter_assembly == 1 ? list : <Text>Не достаточно прав</Text>}
-
+              {this.state.access.enter_assembly == 1 ? (
+                list
+              ) : (
+                <Text>Не достаточно прав</Text>
+              )}
             </ScrollView>
             <TouchableOpacity
               onPress={() => this.setState({ modalAddActive: true })}
@@ -149,7 +160,11 @@ export default class MainScreen extends React.Component {
               onPress={() => navigate("Orders")}
               style={styles.tabButton}
             >
-              <TabBarIcon size={25} color={Colors.darkGrayColor} name="md-list-outline" />
+              <TabBarIcon
+                size={25}
+                color={Colors.darkGrayColor}
+                name="list-outline"
+              />
               <Text
                 style={[styles.tabButtonText, { color: Colors.darkGrayColor }]}
               >
@@ -161,14 +176,17 @@ export default class MainScreen extends React.Component {
               onPress={() => navigate("Settings")}
               style={styles.tabButton}
             >
-              <TabBarIcon size={25} color={Colors.darkGrayColor} name="settings" />
+              <TabBarIcon
+                size={25}
+                color={Colors.darkGrayColor}
+                name="settings"
+              />
               <Text
                 style={[styles.tabButtonText, { color: Colors.darkGrayColor }]}
               >
                 Настройки
               </Text>
             </TouchableOpacity>
-
           </View>
         </SafeAreaView>
 
@@ -182,13 +200,19 @@ export default class MainScreen extends React.Component {
             console.log(val);
             this.setState({ modalAddActive: false });
             if (val == 0) {
-              if (this.state.access.enter_sel == 1) this.props.navigation.navigate("Selling"); else Alert.alert("Не достаточно прав !")
+              if (this.state.access.enter_sel == 1)
+                this.props.navigation.navigate("Selling");
+              else Alert.alert("Не достаточно прав !");
             }
             if (val == 1) {
-              if (this.state.access.add_item == 1) this.props.navigation.navigate("NewProduct"); else Alert.alert("Не достаточно прав !")
+              if (this.state.access.add_item == 1)
+                this.props.navigation.navigate("NewProduct");
+              else Alert.alert("Не достаточно прав !");
             }
             if (val == 2) {
-              if (this.state.access.enter_order == 1) this.props.navigation.navigate("NewOrder"); else Alert.alert("Не достаточно прав !")
+              if (this.state.access.enter_order == 1)
+                this.props.navigation.navigate("NewOrder");
+              else Alert.alert("Не достаточно прав !");
             }
           }}
           title="Добавить:"

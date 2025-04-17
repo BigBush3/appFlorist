@@ -212,12 +212,12 @@ export default class LogInScreen extends React.Component {
 
     return (
       <View style={styles.container}>
-        <UiHeader
-          headerText="Авторизация"
-          btnLeft="back"
-          pressLeft={() => this.props.navigation.navigate("Home")}
-        />
         <SafeAreaView style={styles.safeArea}>
+          <UiHeader
+            headerText="Авторизация"
+            btnLeft="back"
+            pressLeft={() => this.props.navigation.navigate("Home")}
+          />
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             keyboardDismissMode="on-drag"
@@ -297,7 +297,7 @@ export default class LogInScreen extends React.Component {
                     >
                       <Ionicons
                         style={styles.backIcon}
-                        name="md-eye"
+                        name="eye"
                         size={22}
                         color="rgba(138,149,157,0.54)"
                       />

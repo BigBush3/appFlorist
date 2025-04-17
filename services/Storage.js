@@ -1,4 +1,4 @@
-import { AsyncStorage } from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const Access = {
   enter_app: 1,
@@ -13,6 +13,7 @@ export const Access = {
 };
 
 export const storeData = (key, value) => {
+  console.log("storeData", key, value);
   let val = JSON.stringify(value);
   return AsyncStorage.setItem(key, val);
 };

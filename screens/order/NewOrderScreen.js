@@ -12,9 +12,9 @@ import {
   View,
 } from "react-native";
 import Dialog from "react-native-dialog";
-import * as ImagePicker from 'expo-image-picker';
-import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
+import * as ImagePicker from "expo-image-picker";
+import Constants from "expo-constants";
+import * as Permissions from "expo-permissions";
 
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -27,19 +27,39 @@ import UiButtonGreen from "../../components/ui/button/ButtonGreen.js";
 import UiHeader from "../../components/ui/header/Header.js";
 import UiModalSelect from "../../components/ui/modal/ModalSelect.js";
 import ModalItemsOrder from "../../components/ui/modal/ModalItemsOrder.js";
-import UiModalRadio from '../../components/ui/modal/ModalRadio.js';
-import UiTextInput from '../../components/ui/form/TextInput.js';
-import UiModalBirthPicker from '../../components/ui/modal/ModalBirthPiker.js';
-import UiModalTimePicker from '../../components/ui/modal/ModalTimePicker.js';
+import UiModalRadio from "../../components/ui/modal/ModalRadio.js";
+import UiTextInput from "../../components/ui/form/TextInput.js";
+import UiModalBirthPicker from "../../components/ui/modal/ModalBirthPiker.js";
+import UiModalTimePicker from "../../components/ui/modal/ModalTimePicker.js";
 
 import Colors from "../../constants/Colors.js";
 import UiSwipeList from "../../components/ui/list/SwipeList";
 
 import { formatDateLine } from "../../components/common/Date";
-import { retrieveData, uploadImageAsync } from '../../services/Storage.js';
+import { retrieveData, uploadImageAsync } from "../../services/Storage.js";
 import { getClients, searchClient } from "../../services/Orders";
-import { openOrder, getOrdersStatus, refreshInfo, refreshPrepay, getOrdersStatusSell, getOrdersStatusDelivery, getOrdersStatusCurier, addUserToOrder, orderPhotos, addPhoto, saveOrder } from "../../services/Orders";
-import { insertProduct, removeProduct,  bouquetList,  save, setTotal, insertBouquet, updateProduct } from "../../services/Check";
+import {
+  openOrder,
+  getOrdersStatus,
+  refreshInfo,
+  refreshPrepay,
+  getOrdersStatusSell,
+  getOrdersStatusDelivery,
+  getOrdersStatusCurier,
+  addUserToOrder,
+  orderPhotos,
+  addPhoto,
+  saveOrder,
+} from "../../services/Orders";
+import {
+  insertProduct,
+  removeProduct,
+  bouquetList,
+  save,
+  setTotal,
+  insertBouquet,
+  updateProduct,
+} from "../../services/Check";
 import { getProductsList } from "../../services/Bouquet";
 import { newOrder } from "../../services/Orders";
 
@@ -68,7 +88,6 @@ export default class NewOrderScreen extends React.Component {
     CHECKID: null,
     ORDERID: null,
 
-
     dostavka: 1,
     DeliveryStatusId: "null",
     receiver: "",
@@ -84,8 +103,8 @@ export default class NewOrderScreen extends React.Component {
 
     settings: {
       keyboardType: 0,
-      leftItems: 0
-    }
+      leftItems: 0,
+    },
   };
 
   componentDidMount() {
@@ -100,8 +119,10 @@ export default class NewOrderScreen extends React.Component {
   getPermissionAsync = async () => {
     if (Constants.platform.ios) {
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (status !== 'granted') {
-        Alert.alert('Sorry, we need camera roll permissions to make this work!');
+      if (status !== "granted") {
+        Alert.alert(
+          "Sorry, we need camera roll permissions to make this work!"
+        );
       }
     }
   };
@@ -110,35 +131,39 @@ export default class NewOrderScreen extends React.Component {
     let val = null;
     _arr.map((item, index) => {
       if (item.STATUSID == _id) val = item.NAME;
-    })
+    });
     return val;
   }
 
   _promisedSetState = (newState) => {
-    return new Promise((resolve) => { this.setState(newState, () => { resolve(); }); });
-  }
-
+    return new Promise((resolve) => {
+      this.setState(newState, () => {
+        resolve();
+      });
+    });
+  };
 
   load = () => {
     this.getPermissionAsync();
 
-    retrieveData("fl_settings").then((data)=>{ 
-      if(data){ 
-        if(data !== null && typeof data !==  undefined) this.setState({settings: data})
+    retrieveData("fl_settings").then((data) => {
+      if (data) {
+        if (data !== null && typeof data !== undefined)
+          this.setState({ settings: data });
       }
-    })
+    });
 
-    retrieveData('user').then((_user) => {
-      console.log('user', _user)
+    retrieveData("user").then((_user) => {
+      console.log("user", _user);
       if (_user) {
         this.setState({
-          userId: _user.USERSID
-        })
+          userId: _user.USERSID,
+        });
 
-        retrieveData('network').then((net) => {
+        retrieveData("network").then((net) => {
           this.setState({ loader: true, network: net });
           newOrder(net.ip, _user.USERSID).then((res) => {
-            console.log("newOrder newOrder", res.result[0].CHECKID , res)
+            console.log("newOrder newOrder", res.result[0].CHECKID, res);
             this.setState({
               CHECKID: res.result[0].CHECKID,
               ORDERID: res.result[0].ORDERID,
@@ -154,18 +179,18 @@ export default class NewOrderScreen extends React.Component {
               receiverphone: "",
               comment: "",
 
-              loader: false
+              loader: false,
             });
-          })
+          });
 
           getOrdersStatusDelivery(net.ip).then((res) => {
             //console.log("ordersStatusDelivery", res);
             if (res.result) {
               res.result.map((item) => {
                 item.label = `${item.NAME}`;
-              })
+              });
 
-              this.setState({ ordersStatusDelivery: res.result, });
+              this.setState({ ordersStatusDelivery: res.result });
             }
           });
 
@@ -175,7 +200,7 @@ export default class NewOrderScreen extends React.Component {
             res.map((item) => {
               item.label = `${item.CLIENT}`;
               item.value = item.CLIENTID;
-            })
+            });
             this.setState({ usersItemList: res });
           });
 
@@ -183,30 +208,22 @@ export default class NewOrderScreen extends React.Component {
             if (res.result) {
               res.result.map((item) => {
                 item.label = `${item.NAME} руб.`;
-              })
+              });
               this.setState({ productsList: res.result, loader: false });
             }
-          })
+          });
 
           bouquetList(net.ip).then((res) => {
-
             if (res.result) {
               res.result.map((item) => {
                 item.label = `${item.NAME} #${item.CHECKID}`;
-              })
+              });
               this.setState({ productsBouquetList: res.result, loader: false });
             }
-          })
-
-
-
-        })
-
+          });
+        });
       }
-    })
-
-
-
+    });
 
     BackHandler.addEventListener("hardwareBackPress", () => {
       Alert.alert(
@@ -214,7 +231,7 @@ export default class NewOrderScreen extends React.Component {
         "Сохранить изменения ?",
         [
           { text: "Да", onPress: () => this._save() },
-          { text: "Нет", onPress: () => this._exitWOS() }
+          { text: "Нет", onPress: () => this._exitWOS() },
         ],
         { cancelable: false }
       );
@@ -223,19 +240,16 @@ export default class NewOrderScreen extends React.Component {
     });
   };
 
-
-
   _exitWOS() {
     this.props.navigation.navigate("Orders");
   }
 
   _save() {
-
-    if(
+    if (
       this.state.date != null &&
       this.state.StartTime != null &&
-      this.state.EndTime  != null
-    ){
+      this.state.EndTime != null
+    ) {
       this.setState({ loader: true });
       saveOrder(
         this.state.network.ip,
@@ -250,123 +264,110 @@ export default class NewOrderScreen extends React.Component {
         this.state.receiverphone,
         this.state.receiveraddress,
         this.state.comment,
-        'null',
-        'null',
-        'null',
-        'null',
+        "null",
+        "null",
+        "null",
+        "null",
         this.state.DeliveryStatusId,
-        'null',
-      ).then((res) => {
-        console.log("SAVE", res);
-        this.setState({ bouquetList: [], loader: false });
-        this.props.navigation.navigate("Orders");
-      }).catch( (res) => {
-        console.log("NOT SAVE", res);
-        Alert.alert("Внимание ошибка на сервере")
-        this.setState({   loader: false });
-        
-      } )
+        "null"
+      )
+        .then((res) => {
+          console.log("SAVE", res);
+          this.setState({ bouquetList: [], loader: false });
+          this.props.navigation.navigate("Orders");
+        })
+        .catch((res) => {
+          console.log("NOT SAVE", res);
+          Alert.alert("Внимание ошибка на сервере");
+          this.setState({ loader: false });
+        });
     } else {
       Alert.alert("Заполните поля дату , время");
     }
-
-
   }
 
-  
   _insertProduct(itemid, amount, price) {
     insertProduct(
       this.state.network.ip,
       this.state.CHECKID,
       0,
-       itemid,
+      itemid,
       amount,
       price,
-       amount *  price
+      amount * price
     ).then((res) => {
       console.log("insertProduct", res);
 
       refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
-        console.log("refreshInfo", info)
-        this.setState({ ordersList: info.result  });
-      })
-
-    })
+        console.log("refreshInfo", info);
+        this.setState({ ordersList: info.result });
+      });
+    });
   }
 
   _insertBouquet(checkid, bouquetcheckid) {
-    insertBouquet(
-      this.state.network.ip,
-      checkid,
-      bouquetcheckid,
-    ).then((res) => {
-      console.log("insertProduct", res);
-
-      refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
-        console.log("refreshInfo", info)
-        this.setState({ ordersList: info.result });
-      })
-
-    })
-  }
-
-  _setTotal(checkid, changeAmount2){
-    setTotal(this.state.network.ip, checkid,  changeAmount2).then((val) => {
-      console.log("setTotal", val);
-      
-
-      refreshInfo(this.state.network.ip,  checkid).then((inf) => {
-        console.log("info",inf)
-        if(inf.result){
-           
-          this.setState({ 
-            ordersList: inf.result, 
-          })
-         
-        }
-      })
-
-    })
-  }
-
-  _updateProduct(id,  changeAmount, price) {
-
-    updateProduct(
-      this.state.network.ip,  id,  changeAmount, parseFloat(price.toString().replace(',', '.')), ( parseFloat(changeAmount.toString().replace(',', '.')) *   parseFloat(price.toString().replace(',', '.')) )).then((res) => {
-        console.log("_updateProduct", res);
-
-        let arr = this.state.ordersList;
-        let _index = 0;
-   
-        arr.map((item, index) => {
-          if (item.id == id) _index = index;
-        })
-        arr[_index].num = changeAmount;
- 
-        this.setState({ 
-          ordersList: arr, 
-           
-        })
-      })
-  }
-
-
-
-  _removeFromBouquet(_id) {
-
-    removeProduct(
-      this.state.network.ip, _id).then((res) => {
-        console.log("removeProduct", res);
+    insertBouquet(this.state.network.ip, checkid, bouquetcheckid).then(
+      (res) => {
+        console.log("insertProduct", res);
 
         refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
-          console.log("refreshInfo", info)
+          console.log("refreshInfo", info);
           this.setState({ ordersList: info.result });
-        })
-
-      })
+        });
+      }
+    );
   }
 
+  _setTotal(checkid, changeAmount2) {
+    setTotal(this.state.network.ip, checkid, changeAmount2).then((val) => {
+      console.log("setTotal", val);
 
+      refreshInfo(this.state.network.ip, checkid).then((inf) => {
+        console.log("info", inf);
+        if (inf.result) {
+          this.setState({
+            ordersList: inf.result,
+          });
+        }
+      });
+    });
+  }
+
+  _updateProduct(id, changeAmount, price) {
+    updateProduct(
+      this.state.network.ip,
+      id,
+      changeAmount,
+      parseFloat(price.toString().replace(",", ".")),
+      parseFloat(changeAmount.toString().replace(",", ".")) *
+        parseFloat(price.toString().replace(",", "."))
+    ).then((res) => {
+      console.log("_updateProduct", res);
+
+      let arr = this.state.ordersList;
+      let _index = 0;
+
+      arr.map((item, index) => {
+        if (item.id == id) _index = index;
+      });
+      arr[_index].num = changeAmount;
+
+      this.setState({
+        ordersList: arr,
+      });
+    });
+  }
+
+  _removeFromBouquet(_id) {
+    removeProduct(this.state.network.ip, _id).then((res) => {
+      console.log("removeProduct", res);
+
+      refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
+        console.log("refreshInfo", info);
+        this.setState({ ordersList: info.result });
+      });
+    });
+  }
 
   render() {
     const { navigate } = this.props.navigation;
@@ -375,32 +376,40 @@ export default class NewOrderScreen extends React.Component {
       return (
         <Text style={styles.infoText} key={index}>
           {item.NAME}:{" "}
-          <Text style={styles.infoTextMark}>{parseFloat(item.AMOUNT.toString().replace(',', '.'))} шт.</Text>
-          {this.state.showEdit ? <Text style={styles.infoTextRedMark} onPress={() => this._removeFromBouquet(item.CHECKITEMID)}> X </Text> : null}
+          <Text style={styles.infoTextMark}>
+            {parseFloat(item.AMOUNT.toString().replace(",", "."))} шт.
+          </Text>
+          {this.state.showEdit ? (
+            <Text
+              style={styles.infoTextRedMark}
+              onPress={() => this._removeFromBouquet(item.CHECKITEMID)}
+            >
+              {" "}
+              X{" "}
+            </Text>
+          ) : null}
         </Text>
-      )
-    })
+      );
+    });
 
     return (
       <View style={styles.container}>
-        <UiHeader
-
-          pressRight={() => {
-            Alert.alert(
-              "Внимание",
-              "Сохранить изменения ?",
-              [
-                { text: "Да", onPress: () => this._save() },
-                { text: "Нет", onPress: () => this._exitWOS() }
-              ],
-              { cancelable: false }
-            );
-
-          }}
-          btnRight="close"
-          headerText="Новый заказ"
-        />
         <SafeAreaView style={styles.safeArea}>
+          <UiHeader
+            pressRight={() => {
+              Alert.alert(
+                "Внимание",
+                "Сохранить изменения ?",
+                [
+                  { text: "Да", onPress: () => this._save() },
+                  { text: "Нет", onPress: () => this._exitWOS() },
+                ],
+                { cancelable: false }
+              );
+            }}
+            btnRight="close"
+            headerText="Новый заказ"
+          />
           <View style={styles.content}>
             <ScrollView
               contentContainerStyle={{ paddingVertical: 16 }}
@@ -417,9 +426,7 @@ export default class NewOrderScreen extends React.Component {
                         placeholder={this.state.date ? this.state.date : "Дата"}
                         inputValue={this.state.date}
                         editable={false}
-                        callBack={() => {
-
-                        }}
+                        callBack={() => {}}
                       />
                     </TouchableOpacity>
 
@@ -428,104 +435,98 @@ export default class NewOrderScreen extends React.Component {
                       onPress={() => this.setState({ modalTimeVisible: true })}
                     >
                       <UiTextInput
-                        placeholder={this.state.StartTime ? this.state.StartTime : "C"}
+                        placeholder={
+                          this.state.StartTime ? this.state.StartTime : "C"
+                        }
                         inputValue={this.state.StartTime}
                         editable={false}
-                        callBack={() => {
-
-                        }}
+                        callBack={() => {}}
                       />
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => this.setState({ modalTimeVisible2: true })}
                     >
                       <UiTextInput
-                        placeholder={this.state.EndTime ? this.state.EndTime : "По"}
+                        placeholder={
+                          this.state.EndTime ? this.state.EndTime : "По"
+                        }
                         inputValue={this.state.EndTime}
                         editable={false}
-                        callBack={() => {
-
-                        }}
+                        callBack={() => {}}
                       />
                     </TouchableOpacity>
-
 
                     <Text style={styles.infoTitle}>Заказчик</Text>
 
                     <UiTextInput
-                      placeholder={ "Заказчик"}
+                      placeholder={"Заказчик"}
                       inputValue={this.state.customer}
-                      
                       callBack={(val) => {
-                        this.setState({ customer: val })
+                        this.setState({ customer: val });
                       }}
                     />
 
                     <UiTextInput
                       placeholder={"Телефон заказчика"}
                       inputValue={this.state.customerphone}
-                      keyboardType='number-pad'
-
+                      keyboardType="number-pad"
                       callBack={(val) => {
-                        this.setState({ customerphone: val })
+                        this.setState({ customerphone: val });
                       }}
                     />
-
-
-
                   </View>
                 </View>
-
 
                 <View style={styles.info}>
                   <View style={styles.infoWrap}>
+                    <Text style={styles.infoTitle}>
+                      Выбраный Тип :{" "}
+                      {this.state.dostavka == 1 ? "Доставка" : "Самовывоз"}
+                    </Text>
 
-                    <Text style={styles.infoTitle}>Выбраный Тип : {this.state.dostavka == 1 ? "Доставка" : "Самовывоз"}</Text>
-
-                    {this.state.dostavka == 0 ?
+                    {this.state.dostavka == 0 ? (
                       <UiButtonGreen
-                        gButtonText="Доставка" onPress={() => this.setState({ dostavka: 1 })} />
-                      :
+                        gButtonText="Доставка"
+                        onPress={() => this.setState({ dostavka: 1 })}
+                      />
+                    ) : (
                       <UiButtonGreen
-                        gButtonText="Самовывоз" onPress={() => this.setState({ dostavka: 0 })} />
-                    }
+                        gButtonText="Самовывоз"
+                        onPress={() => this.setState({ dostavka: 0 })}
+                      />
+                    )}
                   </View>
                 </View>
 
-
-                {this.state.dostavka == 1 ?
+                {this.state.dostavka == 1 ? (
                   <View style={styles.info}>
                     <View style={styles.infoWrap}>
-
                       <Text style={styles.infoTitle}>Получатель</Text>
                       <UiTextInput
                         placeholder={"Получатель"}
                         inputValue={this.state.receiver}
-
                         callBack={(val) => {
-                          this.setState({ receiver: val })
+                          this.setState({ receiver: val });
                         }}
                       />
                       <UiTextInput
                         placeholder={"Телефон получателя"}
                         inputValue={this.state.receiverphone}
-                        keyboardType='number-pad'
-
+                        keyboardType="number-pad"
                         callBack={(val) => {
-                          this.setState({ receiverphone: val })
+                          this.setState({ receiverphone: val });
                         }}
                       />
                       <UiTextInput
                         placeholder={"адрес доставки"}
                         inputValue={this.state.receiveraddress}
-                      
                         callBack={(val) => {
-                          this.setState({ receiveraddress: val })
+                          this.setState({ receiveraddress: val });
                         }}
                       />
-
                     </View>
-                  </View> : null}
+                  </View>
+                ) : null}
 
                 <View style={styles.info}>
                   <View style={styles.infoWrap}>
@@ -534,56 +535,57 @@ export default class NewOrderScreen extends React.Component {
                   </View>
                 </View>
                 <View style={styles.info}>
-
                   <UiButtonGreen
                     gButtonText="Изменить состав"
                     onPress={() => {
                       this.setState({
-                        modalItemsEditActive: true
+                        modalItemsEditActive: true,
                       });
                     }}
                   />
-
                 </View>
 
                 <View style={styles.info}>
                   <View style={styles.infoWrap}>
-
                     <Text style={styles.infoTitle}>Комментарий</Text>
                     <UiTextInput
                       placeholder={"Комментарий"}
                       inputValue={this.state.comment}
                       callBack={(val) => {
-                        this.setState({ comment: val })
+                        this.setState({ comment: val });
                       }}
                     />
 
-                    <Text style={styles.infoTitle}>Статус доставки:  {this._getStatusName(this.state.ordersStatusDelivery, this.state.DeliveryStatusId)}</Text>
+                    <Text style={styles.infoTitle}>
+                      Статус доставки:{" "}
+                      {this._getStatusName(
+                        this.state.ordersStatusDelivery,
+                        this.state.DeliveryStatusId
+                      )}
+                    </Text>
 
                     <UiButtonGreen
-                      gButtonText="Изменить статус доставки" onPress={() => this.setState({ modalStatusDeliveryActive: true })} />
-
-
-
+                      gButtonText="Изменить статус доставки"
+                      onPress={() =>
+                        this.setState({ modalStatusDeliveryActive: true })
+                      }
+                    />
                   </View>
                 </View>
 
                 <View style={styles.info}>
-                  <UiButtonGreen gButtonText="Создать" onPress={() => this._save()} />
+                  <UiButtonGreen
+                    gButtonText="Создать"
+                    onPress={() => this._save()}
+                  />
                 </View>
-
               </View>
             </ScrollView>
-
           </View>
-
-
         </SafeAreaView>
 
         {/* modals */}
         <Loader show={this.state.loader} />
-
-
 
         <ModalItemsOrder
           list={this.state.ordersList}
@@ -594,17 +596,17 @@ export default class NewOrderScreen extends React.Component {
           removeFromBouquet={(val) => {
             this._removeFromBouquet(val);
           }}
-          insertBouquet={(  bouquetcheckid ) => {
-            this._insertBouquet( this.state.CHECKID, bouquetcheckid )
+          insertBouquet={(bouquetcheckid) => {
+            this._insertBouquet(this.state.CHECKID, bouquetcheckid);
           }}
-          insertProduct={( itemid, amount, price ) => {
-            this._insertProduct( itemid, amount, price )
+          insertProduct={(itemid, amount, price) => {
+            this._insertProduct(itemid, amount, price);
           }}
-          updateProduct={( id,  changeAmount, price ) => {
-            this._updateProduct(id,  changeAmount, price )
+          updateProduct={(id, changeAmount, price) => {
+            this._updateProduct(id, changeAmount, price);
           }}
           setTotal={(changeAmount2) => {
-            this._setTotal(this.state.CHECKID, changeAmount2)
+            this._setTotal(this.state.CHECKID, changeAmount2);
           }}
           title="Состав заказа:"
         />
@@ -614,10 +616,17 @@ export default class NewOrderScreen extends React.Component {
           modalChecked={[]}
           modalItems={this.state.productsList}
           modalCallBack={(val) => {
-            console.log(val.PRICE, val)
-            this.setState({ selectedProduct: val, itemid: val.ITEMID, price: parseFloat(val.PRICE.toString().replace(',', '.')), showModalCount: true });
+            console.log(val.PRICE, val);
+            this.setState({
+              selectedProduct: val,
+              itemid: val.ITEMID,
+              price: parseFloat(val.PRICE.toString().replace(",", ".")),
+              showModalCount: true,
+            });
           }}
-          selectFunction={() => { this.setState({ modalAddActive: !this.state.modalAddActive }); }}
+          selectFunction={() => {
+            this.setState({ modalAddActive: !this.state.modalAddActive });
+          }}
           modalVisible={this.state.modalAddActive}
         />
 
@@ -625,24 +634,28 @@ export default class NewOrderScreen extends React.Component {
           subtitle="Выберите пользователя:"
           modalChecked={this.state.clientId}
           modalItems={this.state.usersItemList}
-          modalCallBack={(val) => this.setState({ customer: val.CLIENT, clientId: val.CLIENTID })}
-          selectFunction={() => { this.setState({ modalUserVisible: !this.state.modalUserVisible }); }}
+          modalCallBack={(val) =>
+            this.setState({ customer: val.CLIENT, clientId: val.CLIENTID })
+          }
+          selectFunction={() => {
+            this.setState({ modalUserVisible: !this.state.modalUserVisible });
+          }}
           modalVisible={this.state.modalUserVisible}
         />
-
 
         <UiModalRadio
           subtitle="Выбрать"
           modalChecked={[]}
           modalItems={this.state.ordersStatusDelivery}
           modalCallBack={(val) => {
-            console.log(val)
+            console.log(val);
             this.setState({
               DeliveryStatusId: val.STATUSID,
-
             });
           }}
-          selectFunction={() => { this.setState({ modalStatusDeliveryActive: false }); }}
+          selectFunction={() => {
+            this.setState({ modalStatusDeliveryActive: false });
+          }}
           modalVisible={this.state.modalStatusDeliveryActive}
         />
 
@@ -650,10 +663,14 @@ export default class NewOrderScreen extends React.Component {
           modalText="Выберите дату"
           modalCallBack={(val) => {
             console.log(val);
-            this.setState({ date: formatDateLine(val) })
+            this.setState({ date: formatDateLine(val) });
           }}
-          modalCancelFunction={() => { this.setState({ modalDate1Visible: !this.state.modalDate1Visible }) }}
-          modalOkFunction={() => { this.setState({ modalDate1Visible: !this.state.modalDate1Visible }) }}
+          modalCancelFunction={() => {
+            this.setState({ modalDate1Visible: !this.state.modalDate1Visible });
+          }}
+          modalOkFunction={() => {
+            this.setState({ modalDate1Visible: !this.state.modalDate1Visible });
+          }}
           modalVisible={this.state.modalDate1Visible}
         />
 
@@ -662,7 +679,7 @@ export default class NewOrderScreen extends React.Component {
           modalCallBack={(val) => {
             console.log(val);
             this.setState({
-              StartTime: val.hh + ':' + val.mm + ":00",
+              StartTime: val.hh + ":" + val.mm + ":00",
             });
           }}
           modalCancelFunction={() => this.setState({ modalTimeVisible: false })}
@@ -676,29 +693,37 @@ export default class NewOrderScreen extends React.Component {
           modalCallBack={(val) => {
             console.log(val);
             this.setState({
-              EndTime: val.hh + ':' + val.mm + ":00",
+              EndTime: val.hh + ":" + val.mm + ":00",
             });
           }}
-          modalCancelFunction={() => this.setState({ modalTimeVisible2: false })}
+          modalCancelFunction={() =>
+            this.setState({ modalTimeVisible2: false })
+          }
           modalOkFunction={() => this.setState({ modalTimeVisible2: false })}
           selectFunction={() => this.setState({ modalTimeVisible2: false })}
           modalVisible={this.state.modalTimeVisible2}
         />
 
-
         <Dialog.Container visible={this.state.showModalCount}>
-          <Dialog.Title style={{ color: "#000" }}>Введите кол-во товара</Dialog.Title>
-          <Dialog.Input style={{ color: "#000" }} keyboardType='numeric' onChangeText={(value) => {
-            this.setState({ amount: value });
-          }} />
-          <Dialog.Button label="Ok" onPress={() => {
-            this.setState({ showModalCount: false }, () => {
-              this._insertBouquet();
-            });
-          }} />
+          <Dialog.Title style={{ color: "#000" }}>
+            Введите кол-во товара
+          </Dialog.Title>
+          <Dialog.Input
+            style={{ color: "#000" }}
+            keyboardType="numeric"
+            onChangeText={(value) => {
+              this.setState({ amount: value });
+            }}
+          />
+          <Dialog.Button
+            label="Ok"
+            onPress={() => {
+              this.setState({ showModalCount: false }, () => {
+                this._insertBouquet();
+              });
+            }}
+          />
         </Dialog.Container>
-
-
       </View>
     );
   }

@@ -10,9 +10,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import * as ImagePicker from 'expo-image-picker';
-import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
+import * as ImagePicker from "expo-image-picker";
+import Constants from "expo-constants";
+import * as Permissions from "expo-permissions";
 import Dialog from "react-native-dialog";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -26,19 +26,43 @@ import UiButtonGreen from "../../components/ui/button/ButtonGreen.js";
 import UiHeader from "../../components/ui/header/Header.js";
 import UiModalSelect from "../../components/ui/modal/ModalSelect.js";
 import ModalItemsOrder from "../../components/ui/modal/ModalItemsOrder.js";
-import UiModalRadio from '../../components/ui/modal/ModalRadio.js';
-import UiTextInput from '../../components/ui/form/TextInput.js';
-import UiModalBirthPicker from '../../components/ui/modal/ModalBirthPiker.js';
-import UiModalTimePicker from '../../components/ui/modal/ModalTimePicker.js';
-
+import UiModalRadio from "../../components/ui/modal/ModalRadio.js";
+import UiTextInput from "../../components/ui/form/TextInput.js";
+import UiModalBirthPicker from "../../components/ui/modal/ModalBirthPiker.js";
+import UiModalTimePicker from "../../components/ui/modal/ModalTimePicker.js";
 
 import Colors from "../../constants/Colors.js";
 
 import { formatDateLine } from "../../components/common/Date";
-import { formatDateSQL } from '../../components/common/Date.js';
-import { addImageItem, uploadImageAsync, retrieveData , Access } from '../../services/Storage.js'
-import { openOrder, getOrdersStatus, refreshInfo, refreshPrepay, getOrdersStatusSell, getOrdersStatusDelivery, getOrdersStatusCurier, addUserToOrder, orderPhotos, addPhoto, saveOrder } from "../../services/Orders";
-import { insertProduct, removeProduct, bouquetList, save , setTotal, insertBouquet, updateProduct} from "../../services/Check";
+import { formatDateSQL } from "../../components/common/Date.js";
+import {
+  addImageItem,
+  uploadImageAsync,
+  retrieveData,
+  Access,
+} from "../../services/Storage.js";
+import {
+  openOrder,
+  getOrdersStatus,
+  refreshInfo,
+  refreshPrepay,
+  getOrdersStatusSell,
+  getOrdersStatusDelivery,
+  getOrdersStatusCurier,
+  addUserToOrder,
+  orderPhotos,
+  addPhoto,
+  saveOrder,
+} from "../../services/Orders";
+import {
+  insertProduct,
+  removeProduct,
+  bouquetList,
+  save,
+  setTotal,
+  insertBouquet,
+  updateProduct,
+} from "../../services/Check";
 import { getProductsList } from "../../services/Bouquet";
 import { getClients, searchClient } from "../../services/Orders";
 
@@ -86,11 +110,10 @@ export default class OrderScreen extends React.Component {
       { value: 2, label: "Оформить заказ", page: "" },
     ],
 
-    
     settings: {
       keyboardType: 0,
-      leftItems: 0
-    }
+      leftItems: 0,
+    },
   };
 
   componentDidMount() {
@@ -105,111 +128,138 @@ export default class OrderScreen extends React.Component {
   getPermissionAsync = async () => {
     if (Constants.platform.ios) {
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (status !== 'granted') {
-        Alert.alert('Sorry, we need camera roll permissions to make this work!');
+      if (status !== "granted") {
+        Alert.alert(
+          "Sorry, we need camera roll permissions to make this work!"
+        );
       }
     }
   };
 
-
   _promisedSetState = (newState) => {
-    return new Promise((resolve) => { this.setState(newState, () => { resolve(); }); });
-  }
-
+    return new Promise((resolve) => {
+      this.setState(newState, () => {
+        resolve();
+      });
+    });
+  };
 
   getPhotos(net) {
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 11).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos11: res.result[0]['NAME'] });
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 11).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos11: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 12).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos12: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 12).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos12: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 13).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos13: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 13).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos13: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 14).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos14: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 14).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos14: res.result[0]["NAME"] });
+        }
       }
-    })
+    );
 
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 21).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos21: res.result[0]['NAME'] });
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 21).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos21: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 22).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos22: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 22).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos22: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 23).then((res) => {
-      console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos23: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 23).then(
+      (res) => {
+        console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos23: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 24).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos24: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 24).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos24: res.result[0]["NAME"] });
+        }
       }
-    })
+    );
 
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 31).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos31: res.result[0]['NAME'] });
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 31).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos31: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 32).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos32: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 32).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos32: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 33).then((res) => {
-      //console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos33: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 33).then(
+      (res) => {
+        //console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos33: res.result[0]["NAME"] });
+        }
       }
-    })
-    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 34).then((res) => {
-     // console.log("orderPhotos", res);
-      if (res.result.length > 0) {
-        this.setState({ ordersPhotos34: res.result[0]['NAME'] });
+    );
+    orderPhotos(net.ip, this.props.navigation.state.params.orderid, 34).then(
+      (res) => {
+        // console.log("orderPhotos", res);
+        if (res.result.length > 0) {
+          this.setState({ ordersPhotos34: res.result[0]["NAME"] });
+        }
       }
-    })
+    );
   }
 
-
   load = () => {
-
     this.getPermissionAsync();
 
-    retrieveData("fl_settings").then((data)=>{ 
-      if(data){ 
-        if(data !== null && typeof data !==  undefined) this.setState({settings: data})
+    retrieveData("fl_settings").then((data) => {
+      if (data) {
+        if (data !== null && typeof data !== undefined)
+          this.setState({ settings: data });
       }
-    })
-    
-    retrieveData("user_access").then((_access) => {
-      if (_access) this.setState({ access: _access })
-    })
+    });
 
-    retrieveData('network').then((net) => {
+    retrieveData("user_access").then((_access) => {
+      if (_access) this.setState({ access: _access });
+    });
+
+    retrieveData("network").then((net) => {
       this.setState({ network: net, loader: true });
 
       this.getPhotos(net);
@@ -217,13 +267,13 @@ export default class OrderScreen extends React.Component {
       getOrdersStatus(net.ip).then((res) => {
         //console.log("getOrdersStatus", res);
         if (res.result) {
-          this.setState({ ordersStatus: res.result, })
+          this.setState({ ordersStatus: res.result });
         }
       });
       getOrdersStatusSell(net.ip).then((res) => {
         //console.log(res);
         if (res.result) {
-          this.setState({ ordersStatusSell: res.result, })
+          this.setState({ ordersStatusSell: res.result });
         }
       });
       getOrdersStatusDelivery(net.ip).then((res) => {
@@ -231,15 +281,15 @@ export default class OrderScreen extends React.Component {
         if (res.result) {
           res.result.map((item) => {
             item.label = `${item.NAME}`;
-          })
+          });
 
-          this.setState({ ordersStatusDelivery: res.result, });
+          this.setState({ ordersStatusDelivery: res.result });
         }
       });
       getOrdersStatusCurier(net.ip).then((res) => {
         //console.log(res);
         if (res.result) {
-          this.setState({ ordersStatusCurier: res.result, })
+          this.setState({ ordersStatusCurier: res.result });
         }
       });
 
@@ -247,21 +297,19 @@ export default class OrderScreen extends React.Component {
         if (res.result) {
           res.result.map((item) => {
             item.label = `${item.NAME} руб.`;
-          })
+          });
           this.setState({ productsList: res.result, loader: false });
         }
-      })
+      });
 
       bouquetList(net.ip).then((res) => {
-
         if (res.result) {
           res.result.map((item) => {
             item.label = `${item.NAME} #${item.CHECKID}`;
-          })
-          this.setState({ productsBouquetList: res.result  });
+          });
+          this.setState({ productsBouquetList: res.result });
         }
-      })
-
+      });
 
       getClients(net.ip).then((res) => {
         let arr = [];
@@ -269,40 +317,39 @@ export default class OrderScreen extends React.Component {
         res.map((item) => {
           item.label = `${item.CLIENT}`;
           item.value = item.CLIENTID;
-        })
+        });
         this.setState({ usersItemList: res });
       });
 
+      openOrder(net.ip, this.props.navigation.state.params.orderid).then(
+        (res) => {
+          console.log(res);
+          if (res.result) {
+            this.setState({
+              loader: false,
+              data: res.result[0],
+              activeTab: 0,
+              DeliveryManId: res.result[0]["DELIVERYMANID"],
+              CHECKID: res.result[0]["CHECKID"],
+            });
 
-      openOrder(net.ip, this.props.navigation.state.params.orderid).then((res) => {
-         console.log(res);
-        if (res.result) {
-          this.setState({
-            loader: false,
-            data: res.result[0],
-            activeTab: 0,
-            DeliveryManId: res.result[0]['DELIVERYMANID'],
-            CHECKID: res.result[0]['CHECKID']
-          })
+            refreshInfo(net.ip, res.result[0]["CHECKID"]).then((info) => {
+              //console.log("refreshInfo", info)
+              this.setState({ ordersList: info.result ? info.result : [] });
+            });
 
-          refreshInfo(net.ip, res.result[0]['CHECKID']).then((info) => {
-            //console.log("refreshInfo", info)
-            this.setState({ ordersList: info.result ? info.result : [] });
-          })
-
-
-          refreshPrepay(net.ip, this.props.navigation.state.params.orderid).then((info) => {
-            //console.log("refreshPrepay", info)
-            this.setState({ prepayList: info.result });
-          })
-
-
-        } else {
-          this.props.navigation.navigate("Orders");
+            refreshPrepay(
+              net.ip,
+              this.props.navigation.state.params.orderid
+            ).then((info) => {
+              //console.log("refreshPrepay", info)
+              this.setState({ prepayList: info.result });
+            });
+          } else {
+            this.props.navigation.navigate("Orders");
+          }
         }
-
-      });
-
+      );
     });
 
     BackHandler.addEventListener("hardwareBackPress", () => {
@@ -311,14 +358,13 @@ export default class OrderScreen extends React.Component {
         "Сохранить изменения ?",
         [
           { text: "Да", onPress: () => this._save() },
-          { text: "Нет", onPress: () => this._exitWOS() }
+          { text: "Нет", onPress: () => this._exitWOS() },
         ],
         { cancelable: false }
       );
       return true;
     });
   };
-
 
   _changeData(_line, _val) {
     let _data = this.state.data;
@@ -333,12 +379,12 @@ export default class OrderScreen extends React.Component {
   _save() {
     this.setState({ loader: true });
 
-
     let DeliveryStatusId = this.state.DeliveryStatusId;
     if (DeliveryStatusId == "") {
       this.state.ordersStatusDelivery.map((item) => {
-        if (item.NAME == this.state.data.DELIVERYSTATUS) DeliveryStatusId = item.STATUSID;
-      })
+        if (item.NAME == this.state.data.DELIVERYSTATUS)
+          DeliveryStatusId = item.STATUSID;
+      });
     }
 
     saveOrder(
@@ -348,155 +394,159 @@ export default class OrderScreen extends React.Component {
       this.state.data.STARTTIME,
       this.state.data.ENDTIME,
       this.state.data.CUSTOMER,
-      this.state.data.CUSTOMERPHONE != "" ? this.state.data.CUSTOMERPHONE : "null",
+      this.state.data.CUSTOMERPHONE != ""
+        ? this.state.data.CUSTOMERPHONE
+        : "null",
       this.state.data.DOSTAVKA,
       this.state.data.RECEIVER,
-      this.state.data.RECEIVERPHONE != "" ? this.state.data.RECEIVERPHONE : "null",
-      this.state.data.RECEIVERADDRESS != "" ? this.state.data.RECEIVERADDRESS : "null",
+      this.state.data.RECEIVERPHONE != ""
+        ? this.state.data.RECEIVERPHONE
+        : "null",
+      this.state.data.RECEIVERADDRESS != ""
+        ? this.state.data.RECEIVERADDRESS
+        : "null",
       this.state.data.COMMENT != "" ? this.state.data.COMMENT : "null",
       this.state.data.SITENUM != "" ? this.state.data.SITENUM : "null",
       this.state.otkydaid != "" ? this.state.otkydaid : "null",
       this.state.statusid != "" ? this.state.statusid : "null",
       this.state.data.CREATINGBY != "" ? this.state.data.CREATINGBY : "null",
-      this.state.DeliveryStatusId != "" ? this.state.DeliveryStatusId : "null", 
-      this.state.DeliveryManId != "" ? this.state.DeliveryManId : "null",
-    ).then((res) => {
-      this.setState({ bouquetList: [], loader: false });
-      this.props.navigation.navigate("Orders");
-    }).catch((err) => {
-      console.log("err", err );
-      this.setState({ bouquetList: [], loader: false });
-      this.props.navigation.navigate("Orders");
-    })
+      this.state.DeliveryStatusId != "" ? this.state.DeliveryStatusId : "null",
+      this.state.DeliveryManId != "" ? this.state.DeliveryManId : "null"
+    )
+      .then((res) => {
+        this.setState({ bouquetList: [], loader: false });
+        this.props.navigation.navigate("Orders");
+      })
+      .catch((err) => {
+        console.log("err", err);
+        this.setState({ bouquetList: [], loader: false });
+        this.props.navigation.navigate("Orders");
+      });
   }
 
-
- 
   _insertProduct(itemid, amount, price) {
     insertProduct(
       this.state.network.ip,
       this.state.CHECKID,
       0,
-       itemid,
+      itemid,
       amount,
       price,
-       amount *  price
+      amount * price
     ).then((res) => {
       console.log("insertProduct", res);
 
       refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
-        console.log("refreshInfo", info)
-        this.setState({ ordersList: info.result  });
-      })
-
-    })
+        console.log("refreshInfo", info);
+        this.setState({ ordersList: info.result });
+      });
+    });
   }
 
   _insertBouquet(checkid, bouquetcheckid) {
-    insertBouquet(
-      this.state.network.ip,
-      checkid,
-      bouquetcheckid,
-    ).then((res) => {
-      console.log("insertProduct", res);
+    insertBouquet(this.state.network.ip, checkid, bouquetcheckid).then(
+      (res) => {
+        console.log("insertProduct", res);
 
-      refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
-        console.log("refreshInfo", info)
-        this.setState({ ordersList: info.result });
-      })
-
-    })
+        refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
+          console.log("refreshInfo", info);
+          this.setState({ ordersList: info.result });
+        });
+      }
+    );
   }
 
-  _setTotal(checkid, changeAmount2){
-    setTotal(this.state.network.ip, checkid,  changeAmount2).then((val) => {
+  _setTotal(checkid, changeAmount2) {
+    setTotal(this.state.network.ip, checkid, changeAmount2).then((val) => {
       console.log("setTotal", val);
-      
 
-      refreshInfo(this.state.network.ip,  checkid).then((inf) => {
-        console.log("info",inf)
-        if(inf.result){
-           
-          this.setState({ 
-            ordersList: inf.result, 
-          })
-         
+      refreshInfo(this.state.network.ip, checkid).then((inf) => {
+        console.log("info", inf);
+        if (inf.result) {
+          this.setState({
+            ordersList: inf.result,
+          });
         }
-      })
-
-    })
+      });
+    });
   }
 
-  _updateProduct(id,  changeAmount, price) {
-
+  _updateProduct(id, changeAmount, price) {
     updateProduct(
-      this.state.network.ip,  id,  changeAmount, parseFloat(price), ( parseFloat(changeAmount.toString().replace(',', '.')) *   parseFloat(price.toString().replace(',', '.')) )).then((res) => {
-       
-        refreshInfo(this.state.network.ip, this.state.data.CHECKID).then((info) => {
+      this.state.network.ip,
+      id,
+      changeAmount,
+      parseFloat(price),
+      parseFloat(changeAmount.toString().replace(",", ".")) *
+        parseFloat(price.toString().replace(",", "."))
+    ).then((res) => {
+      refreshInfo(this.state.network.ip, this.state.data.CHECKID).then(
+        (info) => {
           //console.log("refreshInfo", info)
           this.setState({ ordersList: info.result });
-        })
-        console.log("_updateProduct", res );
-
-      })
+        }
+      );
+      console.log("_updateProduct", res);
+    });
   }
-
 
   _removeFromBouquet(_id) {
     console.log("removeProduct", _id);
-    removeProduct(
-      this.state.network.ip, _id).then((res) => {
-        //console.log("removeProduct", res);
+    removeProduct(this.state.network.ip, _id).then((res) => {
+      //console.log("removeProduct", res);
 
-        refreshInfo(this.state.network.ip, this.state.data.CHECKID).then((info) => {
+      refreshInfo(this.state.network.ip, this.state.data.CHECKID).then(
+        (info) => {
           //console.log("refreshInfo", info)
           this.setState({ ordersList: info.result });
-        })
-
-      })
+        }
+      );
+    });
   }
 
-
-
-
   _pickImage = async (_photoNum) => {
-
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
     });
 
     if (!result.cancelled) {
       await this._promisedSetState({ loader: true });
-      let uri = Platform.OS === "android" ? result.uri : result.uri.replace("file://", "");
+      let uri =
+        Platform.OS === "android"
+          ? result.uri
+          : result.uri.replace("file://", "");
       console.log(result);
 
-      uploadImageAsync(this.state.network.ip, result.uri).then((res) => {
-        console.log("avatart", res)
-        this._promisedSetState({ loader: false });
-        if (res.image) {
-          addPhoto(this.state.network.ip, this.props.navigation.state.params.orderid, res.image.image_name, _photoNum).then((result) => {
-            console.log(result);
-            this.getPhotos(this.state.network);
-          })
-
-        }
-      }).catch((res) => {
-        console.log("err", res);
-        this._promisedSetState({ loader: false });
-      });
-
-
+      uploadImageAsync(this.state.network.ip, result.uri)
+        .then((res) => {
+          console.log("avatart", res);
+          this._promisedSetState({ loader: false });
+          if (res.image) {
+            addPhoto(
+              this.state.network.ip,
+              this.props.navigation.state.params.orderid,
+              res.image.image_name,
+              _photoNum
+            ).then((result) => {
+              console.log(result);
+              this.getPhotos(this.state.network);
+            });
+          }
+        })
+        .catch((res) => {
+          console.log("err", res);
+          this._promisedSetState({ loader: false });
+        });
     } else {
       this.setState({ modalAlertAddVisible: !this.state.modalAlertAddVisible });
     }
   };
 
-
   _getStatusName(_arr, _id) {
     let val = null;
     _arr.map((item, index) => {
       if (item.STATUSID == _id) val = item.NAME;
-    })
+    });
     return val;
   }
 
@@ -508,10 +558,18 @@ export default class OrderScreen extends React.Component {
         <Text style={styles.infoText} key={index}>
           {item.NAME}:{" "}
           <Text style={styles.infoTextMark}>{parseInt(item.AMOUNT)} шт.</Text>
-          {this.state.showEdit ? <Text style={styles.infoTextRedMark} onPress={() => this._removeFromBouquet(item.CHECKITEMID)}> X </Text> : null}
+          {this.state.showEdit ? (
+            <Text
+              style={styles.infoTextRedMark}
+              onPress={() => this._removeFromBouquet(item.CHECKITEMID)}
+            >
+              {" "}
+              X{" "}
+            </Text>
+          ) : null}
         </Text>
-      )
-    })
+      );
+    });
 
     let prepayList = this.state.prepayList.map((item, index) => {
       return (
@@ -519,193 +577,214 @@ export default class OrderScreen extends React.Component {
           {item.NAME}:{" "}
           <Text style={styles.infoTextMark}>{item.TOTAL} руб.</Text>
         </Text>
-      )
-    })
+      );
+    });
 
     return (
       <View style={styles.container}>
-        <UiHeader
-          btnLeft="back"
-          pressLeft={() => {
-            Alert.alert(
-              "Внимание",
-              "Сохранить изменения ?",
-              [
-                { text: "Да", onPress: () => this._save() },
-                { text: "Нет", onPress: () => this._exitWOS() }
-              ],
-              { cancelable: false }
-            );
-
-
-          }}
-          headerText={this.state.data ? `Заказ №${this.state.data.CHECKID}` : null}
-        />
-        {this.state.data ?
-          <SafeAreaView style={styles.safeArea}>
-            <View style={styles.content}>
-              <ScrollView
-                contentContainerStyle={{ paddingVertical: 16 }}
-                style={styles.scrollView}
-              >
-                {this.state.activeTab == 0 ? (
-                  <View style={styles.tabContent}>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        {/*
+        <SafeAreaView style={styles.safeArea}>
+          <UiHeader
+            btnLeft="back"
+            pressLeft={() => {
+              Alert.alert(
+                "Внимание",
+                "Сохранить изменения ?",
+                [
+                  { text: "Да", onPress: () => this._save() },
+                  { text: "Нет", onPress: () => this._exitWOS() },
+                ],
+                { cancelable: false }
+              );
+            }}
+            headerText={
+              this.state.data ? `Заказ №${this.state.data.CHECKID}` : null
+            }
+          />
+          {this.state.data ? (
+            <View>
+              <View style={styles.content}>
+                <ScrollView
+                  contentContainerStyle={{ paddingVertical: 16 }}
+                  style={styles.scrollView}
+                >
+                  {this.state.activeTab == 0 ? (
+                    <View style={styles.tabContent}>
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          {/*
                         <Text style={styles.infoText}   >
                           Дата заказа:{" "}
                           <Text style={styles.infoTextMark}>{(this.state.data.TOTIME)}</Text>
                         </Text>
                         */}
 
-                        <Text style={styles.infoText} onPress={() => this.setState({ modalDate1Visible: true })} >
-                          Дата получения заказа:{" "}
-                          <Text style={styles.infoTextMark}>{(this.state.data.TOTIME)}</Text>
-                        </Text>
+                          <Text
+                            style={styles.infoText}
+                            onPress={() =>
+                              this.setState({ modalDate1Visible: true })
+                            }
+                          >
+                            Дата получения заказа:{" "}
+                            <Text style={styles.infoTextMark}>
+                              {this.state.data.TOTIME}
+                            </Text>
+                          </Text>
 
-                        <Text style={styles.infoText} onPress={() => this.setState({ modalTimeVisible: true })} >
-                          Интервал получения заказа:{" "}
-                          <Text style={styles.infoTextMark}>C {this.state.data.STARTTIME} </Text>
-                        </Text>
+                          <Text
+                            style={styles.infoText}
+                            onPress={() =>
+                              this.setState({ modalTimeVisible: true })
+                            }
+                          >
+                            Интервал получения заказа:{" "}
+                            <Text style={styles.infoTextMark}>
+                              C {this.state.data.STARTTIME}{" "}
+                            </Text>
+                          </Text>
 
-                        <Text style={styles.infoText} onPress={() => this.setState({ modalTimeVisible2: true })} >
-                          Интервал получения заказа:{" "}
-                          <Text style={styles.infoTextMark}>ПО {this.state.data.ENDTIME}</Text>
-                        </Text>
-
+                          <Text
+                            style={styles.infoText}
+                            onPress={() =>
+                              this.setState({ modalTimeVisible2: true })
+                            }
+                          >
+                            Интервал получения заказа:{" "}
+                            <Text style={styles.infoTextMark}>
+                              ПО {this.state.data.ENDTIME}
+                            </Text>
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}  >Заказчик</Text>
-                        <Text style={styles.infoText}>
-                          ФИО заказчика:{" "}
-                        </Text>
- 
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>Заказчик</Text>
+                          <Text style={styles.infoText}>ФИО заказчика: </Text>
 
                           <UiTextInput
                             placeholder={this.state.data.CUSTOMER}
                             inputValue={this.state.data.CUSTOMER}
-                          
                             callBack={(val) => {
-                              this._changeData("CUSTOMER", val)
-                              this.setState({ customer: val })
+                              this._changeData("CUSTOMER", val);
+                              this.setState({ customer: val });
                             }}
                           />
-                      
 
-                        <Text style={styles.infoText}>
-                          Телефон заказчика:{" "}
-                        </Text>
+                          <Text style={styles.infoText}>
+                            Телефон заказчика:{" "}
+                          </Text>
 
-                        <UiTextInput
-                          placeholder={this.state.data.CUSTOMERPHONE}
-                          inputValue={this.state.data.CUSTOMERPHONE}
-                          keyboardType='number-pad'
+                          <UiTextInput
+                            placeholder={this.state.data.CUSTOMERPHONE}
+                            inputValue={this.state.data.CUSTOMERPHONE}
+                            keyboardType="number-pad"
+                            callBack={(val) => {
+                              this._changeData("CUSTOMERPHONE", val);
+                              this.setState({ customerphone: val });
+                            }}
+                          />
+                        </View>
+                      </View>
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          {this.state.data.DOSTAVKA == 1 ? (
+                            <MaterialCommunityIcons
+                              name="truck-delivery"
+                              size={32}
+                              color={Colors.greenColor}
+                            />
+                          ) : (
+                            <MaterialCommunityIcons
+                              name="shopping"
+                              size={32}
+                              color={Colors.grayColor}
+                            />
+                          )}
 
-                          callBack={(val) => {
-                            this._changeData("CUSTOMERPHONE", val)
-                            this.setState({ customerphone: val })
+                          <Text style={styles.infoTitle}>
+                            Способ получения :{" "}
+                            {this.state.data.DOSTAVKA == 1
+                              ? "Доставка"
+                              : "Самовывоз"}
+                          </Text>
+
+                          {this.state.data.DOSTAVKA == 0 ? (
+                            <UiButtonGreen
+                              gButtonText="Установить Доставка"
+                              onPress={() => this._changeData("DOSTAVKA", 1)}
+                            />
+                          ) : (
+                            <UiButtonGreen
+                              gButtonText="Установить Самовывоз"
+                              onPress={() => this._changeData("DOSTAVKA", 0)}
+                            />
+                          )}
+                        </View>
+                      </View>
+                      {this.state.data.DOSTAVKA == 1 ? (
+                        <View style={styles.info}>
+                          <View style={styles.infoWrap}>
+                            <Text style={styles.infoTitle}>Получатель</Text>
+
+                            <UiTextInput
+                              inputValue={this.state.data.RECEIVER}
+                              callBack={(val) => {
+                                this._changeData("RECEIVER", val);
+                              }}
+                            />
+                            <UiTextInput
+                              placeholder={
+                                this.state.data.RECEIVERPHONE
+                                  ? this.state.data.RECEIVERPHONE
+                                  : "Телефон получателя"
+                              }
+                              inputValue={this.state.data.RECEIVERPHONE}
+                              callBack={(val) => {
+                                this._changeData("RECEIVERPHONE", val);
+                              }}
+                            />
+                            <UiTextInput
+                              placeholder={
+                                this.state.data.RECEIVERADDRESS
+                                  ? this.state.data.RECEIVERADDRESS
+                                  : "Адрес доставки"
+                              }
+                              inputValue={this.state.data.RECEIVERADDRESS}
+                              callBack={(val) => {
+                                this._changeData("RECEIVERADDRESS", val);
+                              }}
+                            />
+                          </View>
+                        </View>
+                      ) : null}
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>Состав заказа</Text>
+                          {ordersList}
+                        </View>
+                      </View>
+                      <View style={styles.info}>
+                        <UiButtonGreen
+                          gButtonText="Изменить состав"
+                          onPress={() => {
+                            if (
+                              this.state.access.rem_item == 1 &&
+                              this.state.access.add_item == 1
+                            )
+                              this.setState({
+                                modalItemsEditActive: true,
+                                //modalAddActive: true
+                              });
+                            else Alert.alert("Не достаточно прав !");
                           }}
                         />
                       </View>
-                    </View>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        {this.state.data.DOSTAVKA == 1 ? (
-                          <MaterialCommunityIcons
-                            name="truck-delivery"
-                            size={32}
-                            color={Colors.greenColor}
-                          />
-                        ) : (
-                          <MaterialCommunityIcons
-                            name="shopping"
-                            size={32}
-                            color={Colors.grayColor}
-                          />
-                        )}
-
-
-                        <Text style={styles.infoTitle}>Способ получения : {this.state.data.DOSTAVKA == 1 ? "Доставка" : "Самовывоз"}</Text>
-
-                        {this.state.data.DOSTAVKA == 0 ?
-                          <UiButtonGreen
-                            gButtonText="Установить Доставка"
-                            onPress={() => this._changeData("DOSTAVKA", 1)}
-                          />
-                          :
-                          <UiButtonGreen
-                            gButtonText="Установить Самовывоз"
-                            onPress={() => this._changeData("DOSTAVKA", 0)}
-                          />
-                        }
-
-                      </View>
-
-                    </View>
-                    {this.state.data.DOSTAVKA == 1 ? (
                       <View style={styles.info}>
                         <View style={styles.infoWrap}>
-                          <Text style={styles.infoTitle}>Получатель</Text>
-
-                          <UiTextInput
-
-                            inputValue={this.state.data.RECEIVER}
-                            callBack={(val) => {
-                              this._changeData("RECEIVER", val)
-                            }}
-                          />
-                          <UiTextInput
-                            placeholder={this.state.data.RECEIVERPHONE ? this.state.data.RECEIVERPHONE : "Телефон получателя"}
-                            inputValue={this.state.data.RECEIVERPHONE}
-
-                            callBack={(val) => {
-                              this._changeData("RECEIVERPHONE", val)
-                            }}
-                          />
-                          <UiTextInput
-                            placeholder={this.state.data.RECEIVERADDRESS ? this.state.data.RECEIVERADDRESS : "Адрес доставки"}
-                            inputValue={this.state.data.RECEIVERADDRESS}
-                            callBack={(val) => {
-                              this._changeData("RECEIVERADDRESS", val)
-                            }}
-                          />
-
-
-
+                          <Text style={styles.infoTitle}>Предоплаты</Text>
+                          {prepayList}
                         </View>
                       </View>
-                    ) : null}
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Состав заказа</Text>
-                        {ordersList}
-                      </View>
-                    </View>
-                    <View style={styles.info}>
-
-                      <UiButtonGreen
-                        gButtonText="Изменить состав"
-                        onPress={() => {
-                          if (this.state.access.rem_item == 1 && this.state.access.add_item == 1) 
-                          this.setState({
-                            modalItemsEditActive: true
-                           //modalAddActive: true
-                          }); else Alert.alert("Не достаточно прав !");
-                        }}
-                      />
-
-                    </View>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Предоплаты</Text>
-                        {prepayList}
-
-                      </View>
-                    </View>
-                    {/*
+                      {/*
                   <View style={styles.info}>
                     <View style={styles.infoWrap}>
                       <Text style={styles.infoTitle}>Доп. инфо</Text>
@@ -715,437 +794,502 @@ export default class OrderScreen extends React.Component {
                     </View>
                   </View>
                   */}
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Комментарий</Text>
-                        <UiTextInput
-                          placeholder={this.state.data.COMMENT ? this.state.data.COMMENT : "Комментарий"}
-                          inputValue={this.state.data.COMMENT}
-
-                          callBack={(val) => {
-                            this._changeData("COMMENT", val)
-                          }}
-                        />
-
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>Комментарий</Text>
+                          <UiTextInput
+                            placeholder={
+                              this.state.data.COMMENT
+                                ? this.state.data.COMMENT
+                                : "Комментарий"
+                            }
+                            inputValue={this.state.data.COMMENT}
+                            callBack={(val) => {
+                              this._changeData("COMMENT", val);
+                            }}
+                          />
+                        </View>
+                      </View>
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>Канал продаж</Text>
+                          <Text style={styles.infoText}>
+                            {this.state.data.OTKYDAID
+                              ? this._getStatusName(
+                                  this.state.ordersStatusSell,
+                                  this.state.data.OTKYDAID
+                                )
+                              : "Не указан"}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Канал продаж</Text>
-                        <Text style={styles.infoText}>{this.state.data.OTKYDAID ? this._getStatusName(this.state.ordersStatusSell, this.state.data.OTKYDAID) : "Не указан"}</Text>
+                  ) : null}
+                  {this.state.activeTab == 1 ? (
+                    <View style={styles.tabContent}>
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>Статус заказа</Text>
+                          <Text style={styles.infoText}>
+                            {this._getStatusName(
+                              this.state.ordersStatus,
+                              this.state.data.STATUSORDERID
+                            )}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                  </View>
-                ) : null}
-                {this.state.activeTab == 1 ? (
-                  <View style={styles.tabContent}>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Статус заказа</Text>
-                        <Text style={styles.infoText}>{this._getStatusName(this.state.ordersStatus, this.state.data.STATUSORDERID)}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Кто выполняет заказ</Text>
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>
+                            Кто выполняет заказ
+                          </Text>
 
-                        {this.state.data.STATUSDELIVERYID != -17 && this.state.DeliveryManId != "" ?
-                          <Text style={styles.infoText}>{this.state.DeliveryManName ? this.state.DeliveryManName : this.state.data.DELIVERYMAN}</Text>
-                          :
-                          <UiButtonGreen gButtonText="Взять в работу" onPress={() => this.setState({ modalStatusDeliveryActive: true })} />
-                        }
-                      </View>
-                    </View>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Статус доставка</Text>
-                        <Text style={styles.infoText}>{this._getStatusName(this.state.ordersStatusDelivery, this.state.data.STATUSDELIVERYID)}</Text>
-                      </View>
-                    </View>
-
-
-                  </View>
-                ) : null}
-                {this.state.activeTab == 2 ? (
-                  <View style={styles.tabContent}>
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Пожелания клиента</Text>
-                        <View style={styles.infoPhotos}>
-
-
-                          {this.state.ordersPhotos11 ?
-                            <TouchableOpacity
-                              onPress={() => { }
+                          {this.state.data.STATUSDELIVERYID != -17 &&
+                          this.state.DeliveryManId != "" ? (
+                            <Text style={styles.infoText}>
+                              {this.state.DeliveryManName
+                                ? this.state.DeliveryManName
+                                : this.state.data.DELIVERYMAN}
+                            </Text>
+                          ) : (
+                            <UiButtonGreen
+                              gButtonText="Взять в работу"
+                              onPress={() =>
+                                this.setState({
+                                  modalStatusDeliveryActive: true,
+                                })
                               }
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos11}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              style={styles.infoPhotoAdd}
-                              onPress={() => this._pickImage(11)}
-                            >
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos12 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(12)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos12}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(12)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos13 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(13)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos13}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(13)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos14 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(14)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos14}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(14)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-
+                            />
+                          )}
+                        </View>
+                      </View>
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>Статус доставка</Text>
+                          <Text style={styles.infoText}>
+                            {this._getStatusName(
+                              this.state.ordersStatusDelivery,
+                              this.state.data.STATUSDELIVERYID
+                            )}
+                          </Text>
                         </View>
                       </View>
                     </View>
+                  ) : null}
+                  {this.state.activeTab == 2 ? (
+                    <View style={styles.tabContent}>
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>
+                            Пожелания клиента
+                          </Text>
+                          <View style={styles.infoPhotos}>
+                            {this.state.ordersPhotos11 ? (
+                              <TouchableOpacity
+                                onPress={() => {}}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos11}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                style={styles.infoPhotoAdd}
+                                onPress={() => this._pickImage(11)}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos12 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(12)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos12}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(12)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos13 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(13)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos13}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(13)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos14 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(14)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos14}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(14)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </View>
+                      </View>
 
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Выполненный заказ</Text>
-                        <View style={styles.infoPhotos}>
-                          {this.state.ordersPhotos21 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(21)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos21}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(21)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos22 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(22)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos22}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(22)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos23 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(23)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos23}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(23)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos24 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(24)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos24}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(24)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>
+                            Выполненный заказ
+                          </Text>
+                          <View style={styles.infoPhotos}>
+                            {this.state.ordersPhotos21 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(21)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos21}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(21)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos22 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(22)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos22}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(22)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos23 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(23)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos23}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(23)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos24 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(24)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos24}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(24)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </View>
+                      </View>
+
+                      <View style={styles.info}>
+                        <View style={styles.infoWrap}>
+                          <Text style={styles.infoTitle}>
+                            Выполненная доставка
+                          </Text>
+                          <View style={styles.infoPhotos}>
+                            {this.state.ordersPhotos31 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(31)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos31}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(31)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos32 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(32)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos32}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(32)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos33 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(33)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos33}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(33)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                            {this.state.ordersPhotos34 ? (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(34)}
+                                style={styles.infoPhoto}
+                              >
+                                <Image
+                                  resizeMode="cover"
+                                  source={{
+                                    uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos34}`,
+                                  }}
+                                  style={styles.infoPhotoImage}
+                                />
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => this._pickImage(34)}
+                                style={styles.infoPhotoAdd}
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={24}
+                                  color={Colors.darkGrayColor}
+                                />
+                              </TouchableOpacity>
+                            )}
+                          </View>
                         </View>
                       </View>
                     </View>
-
-                    <View style={styles.info}>
-                      <View style={styles.infoWrap}>
-                        <Text style={styles.infoTitle}>Выполненная доставка</Text>
-                        <View style={styles.infoPhotos}>
-                          {this.state.ordersPhotos31 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(31)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos31}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(31)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos32 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(32)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos32}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(32)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos33 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(33)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos33}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(33)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-                          {this.state.ordersPhotos34 ?
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(34)}
-                              style={styles.infoPhoto}
-                            >
-                              <Image
-                                resizeMode="cover"
-                                source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos34}` }}
-                                style={styles.infoPhotoImage}
-                              />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity
-                              onPress={() => this._pickImage(34)}
-                              style={styles.infoPhotoAdd}>
-                              <Ionicons
-                                name="add"
-                                size={24}
-                                color={Colors.darkGrayColor}
-                              />
-                            </TouchableOpacity>
-                          }
-
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                ) : null}
-              </ScrollView>
-
+                  ) : null}
+                </ScrollView>
+              </View>
+              <View style={styles.tabs}>
+                <TouchableOpacity
+                  onPress={() => this.setState({ activeTab: 0 })}
+                  style={styles.tabButton}
+                >
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={32}
+                    color={
+                      this.state.activeTab == 0
+                        ? Colors.greenColor
+                        : Colors.darkGrayColor
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.tabButtonText,
+                      this.state.activeTab == 0
+                        ? { color: Colors.greenColor }
+                        : { color: Colors.darkGrayColor },
+                    ]}
+                  >
+                    Инфо
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => this.setState({ activeTab: 1 })}
+                  style={styles.tabButton}
+                >
+                  <Ionicons
+                    name="bookmarks-outline"
+                    size={26}
+                    color={
+                      this.state.activeTab == 1
+                        ? Colors.greenColor
+                        : Colors.darkGrayColor
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.tabButtonText,
+                      this.state.activeTab == 1
+                        ? { color: Colors.greenColor }
+                        : { color: Colors.darkGrayColor },
+                    ]}
+                  >
+                    Статусы
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => this.setState({ activeTab: 2 })}
+                  style={styles.tabButton}
+                >
+                  <Ionicons
+                    name="image-outline"
+                    size={28}
+                    color={
+                      this.state.activeTab == 2
+                        ? Colors.greenColor
+                        : Colors.darkGrayColor
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.tabButtonText,
+                      this.state.activeTab == 2
+                        ? { color: Colors.greenColor }
+                        : { color: Colors.darkGrayColor },
+                    ]}
+                  >
+                    Фото
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.tabs}>
-              <TouchableOpacity
-                onPress={() => this.setState({ activeTab: 0 })}
-                style={styles.tabButton}
-              >
-                <Ionicons
-                  name="ios-information-circle-outline"
-                  size={32}
-                  color={
-                    this.state.activeTab == 0
-                      ? Colors.greenColor
-                      : Colors.darkGrayColor
-                  }
-                />
-                <Text
-                  style={[
-                    styles.tabButtonText,
-                    this.state.activeTab == 0
-                      ? { color: Colors.greenColor }
-                      : { color: Colors.darkGrayColor },
-                  ]}
-                >
-                  Инфо
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => this.setState({ activeTab: 1 })}
-                style={styles.tabButton}
-              >
-                <Ionicons
-                  name="ios-bookmarks-outline"
-                  size={26}
-                  color={
-                    this.state.activeTab == 1
-                      ? Colors.greenColor
-                      : Colors.darkGrayColor
-                  }
-                />
-                <Text
-                  style={[
-                    styles.tabButtonText,
-                    this.state.activeTab == 1
-                      ? { color: Colors.greenColor }
-                      : { color: Colors.darkGrayColor },
-                  ]}
-                >
-                  Статусы
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => this.setState({ activeTab: 2 })}
-                style={styles.tabButton}
-              >
-                <Ionicons
-                  name="ios-image-outline"
-                  size={28}
-                  color={
-                    this.state.activeTab == 2
-                      ? Colors.greenColor
-                      : Colors.darkGrayColor
-                  }
-                />
-                <Text
-                  style={[
-                    styles.tabButtonText,
-                    this.state.activeTab == 2
-                      ? { color: Colors.greenColor }
-                      : { color: Colors.darkGrayColor },
-                  ]}
-                >
-                  Фото
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </SafeAreaView>
-          : null}
+          ) : null}
+        </SafeAreaView>
         {/* modals */}
         <Loader show={this.state.loader} />
-
-
 
         <ModalItemsOrder
           list={this.state.ordersList}
@@ -1156,21 +1300,20 @@ export default class OrderScreen extends React.Component {
           removeFromBouquet={(val) => {
             this._removeFromBouquet(val);
           }}
-          insertBouquet={(  bouquetcheckid ) => {
-            this._insertBouquet( this.state.CHECKID, bouquetcheckid )
+          insertBouquet={(bouquetcheckid) => {
+            this._insertBouquet(this.state.CHECKID, bouquetcheckid);
           }}
-          insertProduct={( itemid, amount, price ) => {
-            this._insertProduct( itemid, amount, price )
+          insertProduct={(itemid, amount, price) => {
+            this._insertProduct(itemid, amount, price);
           }}
-          updateProduct={( id,  changeAmount, price ) => {
-            this._updateProduct(id,  changeAmount, price )
+          updateProduct={(id, changeAmount, price) => {
+            this._updateProduct(id, changeAmount, price);
           }}
           setTotal={(changeAmount2) => {
-            this._setTotal(this.state.CHECKID, changeAmount2)
+            this._setTotal(this.state.CHECKID, changeAmount2);
           }}
           title="Состав заказа:"
         />
-
 
         {/*
         <UiModalSelect
@@ -1191,15 +1334,20 @@ export default class OrderScreen extends React.Component {
           modalChecked={[]}
           modalItems={this.state.ordersStatusDelivery}
           modalCallBack={(val) => {
-            console.log(val.USERSID, val)
-            this.setState({
-              DeliveryManId: val.USERSID,
-              DeliveryManName: val.NAME
-            }, () => {
-              this._save()
-            });
+            console.log(val.USERSID, val);
+            this.setState(
+              {
+                DeliveryManId: val.USERSID,
+                DeliveryManName: val.NAME,
+              },
+              () => {
+                this._save();
+              }
+            );
           }}
-          selectFunction={() => { this.setState({ modalStatusDeliveryActive: false }); }}
+          selectFunction={() => {
+            this.setState({ modalStatusDeliveryActive: false });
+          }}
           modalVisible={this.state.modalStatusDeliveryActive}
         />
 
@@ -1208,10 +1356,17 @@ export default class OrderScreen extends React.Component {
           modalChecked={[]}
           modalItems={this.state.productsList}
           modalCallBack={(val) => {
-            console.log(val.PRICE, val)
-            this.setState({ selectedProduct: val, itemid: val.ITEMID, price: parseFloat(val.PRICE), showModalCount: true });
+            console.log(val.PRICE, val);
+            this.setState({
+              selectedProduct: val,
+              itemid: val.ITEMID,
+              price: parseFloat(val.PRICE),
+              showModalCount: true,
+            });
           }}
-          selectFunction={() => { this.setState({ modalAddActive: !this.state.modalAddActive }); }}
+          selectFunction={() => {
+            this.setState({ modalAddActive: !this.state.modalAddActive });
+          }}
           modalVisible={this.state.modalAddActive}
         />
 
@@ -1223,23 +1378,28 @@ export default class OrderScreen extends React.Component {
             this._changeData("CUSTOMER", val.CLIENT);
             this.setState({
               CUSTOMER: val.CLIENT,
-              //CUSTOMER: val.CLIENTID 
+              //CUSTOMER: val.CLIENTID
             });
           }}
-          selectFunction={() => { this.setState({ modalUserVisible: !this.state.modalUserVisible }); }}
+          selectFunction={() => {
+            this.setState({ modalUserVisible: !this.state.modalUserVisible });
+          }}
           modalVisible={this.state.modalUserVisible}
         />
-
 
         <UiModalBirthPicker
           modalText="Выберите дату"
           modalCallBack={(val) => {
             console.log(val);
-            this._changeData("TOTIME", formatDateLine(val))
-            this.setState({ date: formatDateLine(val) })
+            this._changeData("TOTIME", formatDateLine(val));
+            this.setState({ date: formatDateLine(val) });
           }}
-          modalCancelFunction={() => { this.setState({ modalDate1Visible: !this.state.modalDate1Visible }) }}
-          modalOkFunction={() => { this.setState({ modalDate1Visible: !this.state.modalDate1Visible }) }}
+          modalCancelFunction={() => {
+            this.setState({ modalDate1Visible: !this.state.modalDate1Visible });
+          }}
+          modalOkFunction={() => {
+            this.setState({ modalDate1Visible: !this.state.modalDate1Visible });
+          }}
           modalVisible={this.state.modalDate1Visible}
         />
 
@@ -1247,9 +1407,9 @@ export default class OrderScreen extends React.Component {
           subtitle="Выберите"
           modalCallBack={(val) => {
             console.log(val);
-            this._changeData("STARTTIME", val.hh + ':' + val.mm + ":00")
+            this._changeData("STARTTIME", val.hh + ":" + val.mm + ":00");
             this.setState({
-              StartTime: val.hh + ':' + val.mm + ":00",
+              StartTime: val.hh + ":" + val.mm + ":00",
             });
           }}
           modalCancelFunction={() => this.setState({ modalTimeVisible: false })}
@@ -1262,32 +1422,44 @@ export default class OrderScreen extends React.Component {
           subtitle="Выберите"
           modalCallBack={(val) => {
             console.log(val);
-            this._changeData("ENDTIME", val.hh + ':' + val.mm + ":00")
+            this._changeData("ENDTIME", val.hh + ":" + val.mm + ":00");
             this.setState({
-              EndTime: val.hh + ':' + val.mm + ":00",
+              EndTime: val.hh + ":" + val.mm + ":00",
             });
           }}
-          modalCancelFunction={() => this.setState({ modalTimeVisible2: false })}
+          modalCancelFunction={() =>
+            this.setState({ modalTimeVisible2: false })
+          }
           modalOkFunction={() => this.setState({ modalTimeVisible2: false })}
           selectFunction={() => this.setState({ modalTimeVisible2: false })}
           modalVisible={this.state.modalTimeVisible2}
         />
 
-
         <Dialog.Container visible={this.state.showModalCount}>
-          <Dialog.Title style={{ color: "#000" }}>Введите кол-во товара</Dialog.Title>
-          <Dialog.Input style={{ color: "#000" }} keyboardType='numeric' onChangeText={(value) => {
-            this.setState({ amount: value });
-          }} />
-          <Dialog.Button label="Ok" onPress={() => {
-            this.setState({ showModalCount: false }, () => {
-              //this._insertBouquet(this.state.itemid, this.state.amount);
-              this._insertProduct(this.state.itemid, this.state.amount, this.state.price );
-            });
-          }} />
+          <Dialog.Title style={{ color: "#000" }}>
+            Введите кол-во товара
+          </Dialog.Title>
+          <Dialog.Input
+            style={{ color: "#000" }}
+            keyboardType="numeric"
+            onChangeText={(value) => {
+              this.setState({ amount: value });
+            }}
+          />
+          <Dialog.Button
+            label="Ok"
+            onPress={() => {
+              this.setState({ showModalCount: false }, () => {
+                //this._insertBouquet(this.state.itemid, this.state.amount);
+                this._insertProduct(
+                  this.state.itemid,
+                  this.state.amount,
+                  this.state.price
+                );
+              });
+            }}
+          />
         </Dialog.Container>
-
-
       </View>
     );
   }

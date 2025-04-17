@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
 import arrowBack from "../../../assets/images/ui/arrowBack-2x.png";
 import closeBack from "../../../assets/images/ui/close-2x.png";
@@ -32,19 +32,19 @@ export default class UiHeader extends React.Component {
         />
         <TouchableOpacity onPress={this.props.pressLeft} style={styles.button}>
           {this.props.btnLeft == "back" ? (
-            <Ionicons name="ios-arrow-back" size={24} color={Colors.whiteColor} />
+            <Ionicons name="arrow-back" size={24} color={Colors.whiteColor} />
           ) : null}
           {this.props.btnLeft == "close" ? (
             <Image source={closeBack} style={styles.buttonImage} />
           ) : null}
           {this.props.btnLeft == "menu" ? (
-            <Ionicons name="ios-menu" size={24} color={Colors.whiteColor} />
+            <Ionicons name="menu-outline" size={24} color={Colors.whiteColor} />
           ) : null}
         </TouchableOpacity>
         <Text style={styles.title}>{this.props.headerText}</Text>
         <TouchableOpacity onPress={this.props.pressRight} style={styles.button}>
           {this.props.btnRight == "close" ? (
-            <Ionicons name="md-close" size={24} color={Colors.whiteColor} />
+            <Ionicons name="close" size={24} color={Colors.whiteColor} />
           ) : null}
         </TouchableOpacity>
       </View>

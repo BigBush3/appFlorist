@@ -62,17 +62,16 @@ export default class ModalItemsOrder extends React.Component {
           this.props.modalClose();
         }}
       >
-        <UiHeader
-          btnLeft="menu"
-          pressLeft={() => this.setState({ showModalTotalPrice: true })}
-          pressRight={() => {
-            this.props.modalClose();
-          }}
-          btnRight="close"
-          headerText="Радактирование состава"
-        />
-
         <SafeAreaView style={styles.safeArea}>
+          <UiHeader
+            btnLeft="menu"
+            pressLeft={() => this.setState({ showModalTotalPrice: true })}
+            pressRight={() => {
+              this.props.modalClose();
+            }}
+            btnRight="close"
+            headerText="Редактирование состава"
+          />
           <View style={styles.content}>
             <ScrollView
               contentContainerStyle={{ paddingVertical: 16 }}

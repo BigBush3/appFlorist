@@ -12,9 +12,9 @@ import {
   View,
 } from "react-native";
 import Dialog from "react-native-dialog";
-import * as ImagePicker from 'expo-image-picker';
-import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
+import * as ImagePicker from "expo-image-picker";
+import Constants from "expo-constants";
+import * as Permissions from "expo-permissions";
 
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -23,17 +23,32 @@ import demoImage from "../../assets/images/icon.png";
 
 import Loader from "../../components/ui/Loader.js";
 import TabBarIcon from "../../components/TabBarIcon.js";
-import UiTextInput from '../../components/ui/form/TextInput.js';
+import UiTextInput from "../../components/ui/form/TextInput.js";
 import UiButtonGreen from "../../components/ui/button/ButtonGreen.js";
 import UiHeader from "../../components/ui/header/Header.js";
 import UiModalSelect from "../../components/ui/modal/ModalSelect.js";
-import UiModalRadio from '../../components/ui/modal/ModalRadio.js';
+import UiModalRadio from "../../components/ui/modal/ModalRadio.js";
 
 import Colors from "../../constants/Colors.js";
 import UiSwipeList from "../../components/ui/list/SwipeList";
 
-import { retrieveData, uploadImageAsync , Access } from '../../services/Storage.js'
-import { getProductsList, newBouquet, insertProduct, removeProduct, updateProduct, dontSave, save, setTotal, addPhoto, getProductsInBouquet } from "../../services/Bouquet";
+import {
+  retrieveData,
+  uploadImageAsync,
+  Access,
+} from "../../services/Storage.js";
+import {
+  getProductsList,
+  newBouquet,
+  insertProduct,
+  removeProduct,
+  updateProduct,
+  dontSave,
+  save,
+  setTotal,
+  addPhoto,
+  getProductsInBouquet,
+} from "../../services/Bouquet";
 
 export default class ProductScreen extends React.Component {
   static navigationOptions = {
@@ -50,7 +65,6 @@ export default class ProductScreen extends React.Component {
     modalAdditionalActive: false,
     activeTab: 0,
     userId: 0,
-
 
     totalPrice: 0,
     CheckName: "Букет",
@@ -73,15 +87,15 @@ export default class ProductScreen extends React.Component {
 
     settings: {
       keyboardType: 0,
-      leftItems: 0
-    }
+      leftItems: 0,
+    },
   };
 
   componentDidMount() {
     //this.load();
-    retrieveData('network').then((net) => {
-      this.setState({  network: net });
-    })
+    retrieveData("network").then((net) => {
+      this.setState({ network: net });
+    });
     this.props.navigation.addListener("willFocus", this.load);
   }
 
@@ -92,33 +106,36 @@ export default class ProductScreen extends React.Component {
   getPermissionAsync = async () => {
     if (Constants.platform.ios) {
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (status !== 'granted') {
-        Alert.alert('Sorry, we need camera roll permissions to make this work!');
+      if (status !== "granted") {
+        Alert.alert(
+          "Sorry, we need camera roll permissions to make this work!"
+        );
       }
     }
   };
 
-
   _promisedSetState = (newState) => {
-    return new Promise((resolve) => { this.setState(newState, () => { resolve(); }); });
-  }
-
+    return new Promise((resolve) => {
+      this.setState(newState, () => {
+        resolve();
+      });
+    });
+  };
 
   load = () => {
-
-    retrieveData("fl_settings").then((data)=>{ 
-      if(data){ 
-        if(data !== null && typeof data !==  undefined) this.setState({settings: data})
+    retrieveData("fl_settings").then((data) => {
+      if (data) {
+        if (data !== null && typeof data !== undefined)
+          this.setState({ settings: data });
       }
-    })
+    });
 
-    
     retrieveData("user_access").then((_access) => {
-      if (_access) this.setState({ access: _access })
-    })
+      if (_access) this.setState({ access: _access });
+    });
 
-    retrieveData("productItem").then((productItemData)=>{ 
-      if(productItemData){ 
+    retrieveData("productItem").then((productItemData) => {
+      if (productItemData) {
         console.log("this.props.navigation.state.params !S", productItemData);
         this.setState({
           checkid: productItemData.checkid,
@@ -130,23 +147,23 @@ export default class ProductScreen extends React.Component {
           ordersPhotos: productItemData.photo,
         });
 
-        retrieveData('network').then((net) => {
+        retrieveData("network").then((net) => {
           this.setState({ loader: true, network: net });
           getProductsList(net.ip, this.state.settings.leftItems).then((res) => {
-           // console.log("getProducts", this.state.settings.leftItems, res)
+            // console.log("getProducts", this.state.settings.leftItems, res)
             if (res.result) {
               res.result.map((item) => {
                 item.label = `${item.NAME} руб.`;
-              })
+              });
               this.setState({ productsList: res.result, loader: false });
             }
-          })
+          });
           getProductsInBouquet(
             net.ip,
             productItemData.checkid,
             productItemData.komplektcheckitemid
           ).then((res) => {
-            console.log(res)
+            console.log(res);
             if (res.result) {
               let arr = [];
               let tPrice = 0;
@@ -154,33 +171,29 @@ export default class ProductScreen extends React.Component {
                 arr.push({
                   id: item.CHECKITEMID,
                   title: item.NAME,
-                  num: parseFloat(item.AMOUNT.toString().replace(',', '.')),
-                  price: parseFloat(item.PRICE.toString().replace(',', '.')),
+                  num: parseFloat(item.AMOUNT.toString().replace(",", ".")),
+                  price: parseFloat(item.PRICE.toString().replace(",", ".")),
                 });
-              })
+              });
               arr.map((item) => {
-                tPrice = tPrice + (item.price * item.num);
-              })
+                tPrice = tPrice + item.price * item.num;
+              });
               this.setState({ bouquetList: arr, totalPrice: tPrice });
             }
-          })
+          });
         });
-    
-
       }
-    })
+    });
 
- 
     this.getPermissionAsync();
-    retrieveData('user').then((_user) => {
-      console.log('user', _user)
+    retrieveData("user").then((_user) => {
+      console.log("user", _user);
       if (_user) {
         this.setState({
-          userId: _user.USERSID
-        })
+          userId: _user.USERSID,
+        });
       }
-    })
-
+    });
 
     BackHandler.addEventListener("hardwareBackPress", () => {
       this._exitWOS();
@@ -215,117 +228,117 @@ export default class ProductScreen extends React.Component {
         id: this.state.selectedProduct.CHECKITEMID,
         title: this.state.selectedProduct.NAME,
         num: this.state.amount,
-        price: this.state.price
+        price: this.state.price,
       });
       arr.map((item) => {
-        tPrice = tPrice + (item.price * item.num);
-      })
+        tPrice = tPrice + item.price * item.num;
+      });
 
       this.setState({ bouquetList: arr, totalPrice: tPrice });
-    })
+    });
   }
 
   _removeFromBouquet(_item) {
-
-    removeProduct(
-      this.state.network.ip, _item.id).then((res) => {
-        console.log("removeProduct", res);
-        let arr = this.state.bouquetList;
-        let _index = 0;
-        arr.map((item, index) => {
-          if (item.id == _item.id) _index = index;
-        })
-        arr.splice(_index, 1);
-        this.setState({ bouquetList: arr })
-      })
+    removeProduct(this.state.network.ip, _item.id).then((res) => {
+      console.log("removeProduct", res);
+      let arr = this.state.bouquetList;
+      let _index = 0;
+      arr.map((item, index) => {
+        if (item.id == _item.id) _index = index;
+      });
+      arr.splice(_index, 1);
+      this.setState({ bouquetList: arr });
+    });
   }
 
   _updateBouquet() {
- 
     updateProduct(
-      this.state.network.ip, this.state.selected.id, this.state.changeAmount, this.state.selected.price, (this.state.changeAmount * this.state.selected.price)).then((res) => {
-        console.log("updateProduct", res);
+      this.state.network.ip,
+      this.state.selected.id,
+      this.state.changeAmount,
+      this.state.selected.price,
+      this.state.changeAmount * this.state.selected.price
+    ).then((res) => {
+      console.log("updateProduct", res);
 
-        let arr = this.state.bouquetList;
-        let _index = 0;
-        let tPrice = 0;
-       
+      let arr = this.state.bouquetList;
+      let _index = 0;
+      let tPrice = 0;
 
-        arr.map((item, index) => {
-          if (item.id == this.state.selected.id) _index = index;
-        })
-        arr[_index].num = this.state.changeAmount;
-        arr.map((item) => {
-          tPrice = parseFloat(tPrice) + (parseFloat(item.price) * (parseFloat(item.num)));
-        })
-        this.setState({ 
-          bouquetList: arr, 
-          totalPrice: tPrice,
-          changeAmount: 0,
-          changeAmount2: 0,  
-        })
-
-      })
+      arr.map((item, index) => {
+        if (item.id == this.state.selected.id) _index = index;
+      });
+      arr[_index].num = this.state.changeAmount;
+      arr.map((item) => {
+        tPrice =
+          parseFloat(tPrice) + parseFloat(item.price) * parseFloat(item.num);
+      });
+      this.setState({
+        bouquetList: arr,
+        totalPrice: tPrice,
+        changeAmount: 0,
+        changeAmount2: 0,
+      });
+    });
   }
 
   _pickImage = async () => {
-
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
     });
 
     if (!result.cancelled) {
       await this._promisedSetState({ loader: true });
-      let uri = Platform.OS === "android" ? result.uri : result.uri.replace("file://", "");
+      let uri =
+        Platform.OS === "android"
+          ? result.uri
+          : result.uri.replace("file://", "");
       console.log(result);
 
-      uploadImageAsync(this.state.network.ip, result.uri).then((res) => {
-        console.log("avatart", res)
-        this._promisedSetState({ loader: false });
-        if (res.image) {
-          this.setState({ ordersPhotos: res.image.image_name });
-          addPhoto(this.state.network.ip, this.state.komplektcheckitemid, res.image.image_name).then((result) => {
-            console.log(result);
-          })
-
-        }
-      }).catch((res) => {
-        console.log("err", res);
-        this._promisedSetState({ loader: false });
-      });
-
-
+      uploadImageAsync(this.state.network.ip, result.uri)
+        .then((res) => {
+          console.log("avatart", res);
+          this._promisedSetState({ loader: false });
+          if (res.image) {
+            this.setState({ ordersPhotos: res.image.image_name });
+            addPhoto(
+              this.state.network.ip,
+              this.state.komplektcheckitemid,
+              res.image.image_name
+            ).then((result) => {
+              console.log(result);
+            });
+          }
+        })
+        .catch((res) => {
+          console.log("err", res);
+          this._promisedSetState({ loader: false });
+        });
     } else {
       this.setState({ modalAlertAddVisible: !this.state.modalAlertAddVisible });
     }
   };
 
-
-
   _exitWOS() {
     this.setState({ loader: true });
-    dontSave(
-      this.state.network.ip,
-      this.state.checkid,
-      this.state.userId
-    ).then((res) => {
-      this.setState({ bouquetList: [], loader: false });
-      this.props.navigation.navigate("Main");
-    }).catch(() => {
-      this.props.navigation.navigate("Main");
-    })
+    dontSave(this.state.network.ip, this.state.checkid, this.state.userId)
+      .then((res) => {
+        this.setState({ bouquetList: [], loader: false });
+        this.props.navigation.navigate("Main");
+      })
+      .catch(() => {
+        this.props.navigation.navigate("Main");
+      });
   }
 
   _save() {
     this.setState({ loader: true });
-    save(
-      this.state.network.ip,
-      this.state.checkid,
-      this.state.CheckName
-    ).then((res) => {
-      this.setState({ bouquetList: [], loader: false });
-      this.props.navigation.navigate("Main");
-    })
+    save(this.state.network.ip, this.state.checkid, this.state.CheckName).then(
+      (res) => {
+        this.setState({ bouquetList: [], loader: false });
+        this.props.navigation.navigate("Main");
+      }
+    );
   }
 
   _removeAll() {
@@ -333,9 +346,9 @@ export default class ProductScreen extends React.Component {
     arr.map((item) => {
       removeProduct(this.state.network.ip, item.id).then((res) => {
         console.log("removeProduct", res);
-      })
-    })
-    this.setState({ bouquetList: [] })
+      });
+    });
+    this.setState({ bouquetList: [] });
   }
 
   render() {
@@ -343,25 +356,24 @@ export default class ProductScreen extends React.Component {
 
     return (
       <View style={styles.container}>
-        <UiHeader
-          btnLeft="menu"
-          pressLeft={() => this.setState({ modalAdditionalActive: true })}
-          pressRight={() => {
-            Alert.alert(
-              "Внимание",
-              "Сохранить изменения ?",
-              [
-                { text: "Нет", onPress: () => this._exitWOS() },
-                { text: "Да", onPress: () => this._save() }
-              ],
-              { cancelable: false }
-            );
-
-          }}
-          btnRight="close"
-          headerText="Редактировать букет"
-        />
         <SafeAreaView style={styles.safeArea}>
+          <UiHeader
+            btnLeft="menu"
+            pressLeft={() => this.setState({ modalAdditionalActive: true })}
+            pressRight={() => {
+              Alert.alert(
+                "Внимание",
+                "Сохранить изменения ?",
+                [
+                  { text: "Нет", onPress: () => this._exitWOS() },
+                  { text: "Да", onPress: () => this._save() },
+                ],
+                { cancelable: false }
+              );
+            }}
+            btnRight="close"
+            headerText="Редактировать букет"
+          />
           <View style={styles.content}>
             <ScrollView
               contentContainerStyle={{ paddingVertical: 16 }}
@@ -370,54 +382,69 @@ export default class ProductScreen extends React.Component {
               <View style={styles.tabContent}>
                 <View style={styles.info}>
                   <View style={styles.infoWrap}>
-                    <Text style={styles.infoText}>
-                      Название :{" "}
-                    </Text>
+                    <Text style={styles.infoText}>Название : </Text>
                     <UiTextInput
-                     inputValue={this.state.CheckName}
-                     callBack={(val) => {
-                       this.setState({ CheckName: val })
-                     }}
-                   />
+                      inputValue={this.state.CheckName}
+                      callBack={(val) => {
+                        this.setState({ CheckName: val });
+                      }}
+                    />
 
                     <Text style={styles.infoText}>
                       Кол-во позиций в букете:{" "}
-                      <Text style={styles.infoTextMark}>{this.state.bouquetList.length}</Text>
+                      <Text style={styles.infoTextMark}>
+                        {this.state.bouquetList.length}
+                      </Text>
                     </Text>
                     <Text style={styles.infoText}>
                       Сумма:{" "}
-                      <Text style={styles.infoTextMark}>{this.state.userPrice ? this.state.userPrice  : this.state.totalPrice} руб.</Text>
+                      <Text style={styles.infoTextMark}>
+                        {this.state.userPrice
+                          ? this.state.userPrice
+                          : this.state.totalPrice}{" "}
+                        руб.
+                      </Text>
                     </Text>
                   </View>
                 </View>
                 <View style={styles.info}>
                   <View style={styles.infoWrap}>
-                    <Text style={styles.infoTitle}>Список товаров в букете</Text>
+                    <Text style={styles.infoTitle}>
+                      Список товаров в букете
+                    </Text>
                     <UiSwipeList
                       swipeList={this.state.bouquetList}
                       onDelete={(id) => this._removeFromBouquet(id)}
-                      onEdit={(item) => this.setState({ selected: item, changeAmount: item.num, showModalCount2: true })}
+                      onEdit={(item) =>
+                        this.setState({
+                          selected: item,
+                          changeAmount: item.num,
+                          showModalCount2: true,
+                        })
+                      }
                     />
                   </View>
                 </View>
-                {this.state.ordersPhotos && this.state.network ?
-                <View style={styles.info}>
-                  <View style={styles.infoPhoto}>
-                    <Image
-                      resizeMode="cover"
-                      source={{ uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos}` }}
-                      style={styles.infoPhotoImage}
-                    />
+                {this.state.ordersPhotos && this.state.network ? (
+                  <View style={styles.info}>
+                    <View style={styles.infoPhoto}>
+                      <Image
+                        resizeMode="cover"
+                        source={{
+                          uri: `http://${this.state.network.ip}/ibm/public/images/${this.state.ordersPhotos}`,
+                        }}
+                        style={styles.infoPhotoImage}
+                      />
+                    </View>
                   </View>
-                </View> : null}
-
-
-
+                ) : null}
 
                 <View style={styles.info}>
-                  <UiButtonGreen gButtonText="Собрать букет" onPress={() => this._save()} />
+                  <UiButtonGreen
+                    gButtonText="Собрать букет"
+                    onPress={() => this._save()}
+                  />
                 </View>
-
               </View>
             </ScrollView>
             <TouchableOpacity
@@ -427,8 +454,6 @@ export default class ProductScreen extends React.Component {
               <TabBarIcon color={Colors.whiteColor} name="add" />
             </TouchableOpacity>
           </View>
-
-
         </SafeAreaView>
 
         {/* modals */}
@@ -438,10 +463,17 @@ export default class ProductScreen extends React.Component {
           modalChecked={[]}
           modalItems={this.state.productsList}
           modalCallBack={(val) => {
-            console.log(val.PRICE, val)
-            this.setState({ selectedProduct: val, itemid: val.ITEMID, price: parseFloat(val.PRICE), showModalCount: true });
+            console.log(val.PRICE, val);
+            this.setState({
+              selectedProduct: val,
+              itemid: val.ITEMID,
+              price: parseFloat(val.PRICE),
+              showModalCount: true,
+            });
           }}
-          selectFunction={() => { this.setState({ modalAddActive: !this.state.modalAddActive }); }}
+          selectFunction={() => {
+            this.setState({ modalAddActive: !this.state.modalAddActive });
+          }}
           modalVisible={this.state.modalAddActive}
         />
 
@@ -450,13 +482,15 @@ export default class ProductScreen extends React.Component {
           modalActive={this.state.modalAdditionalActive}
           modalClose={() => this.setState({ modalAdditionalActive: false })}
           onPress={(val) => {
-
             this.setState({ modalAdditionalActive: false });
-            if (val == 0) { 
-              if (this.state.access.add_price == 1)  this.setState({ showModalTotalPrice: true }); else Alert.alert("Не достаточно прав !");
+            if (val == 0) {
+              if (this.state.access.add_price == 1)
+                this.setState({ showModalTotalPrice: true });
+              else Alert.alert("Не достаточно прав !");
             }
-            if (val == 1) { 
-              if (this.state.access.rem_item == 1)  this._removeAll(); else Alert.alert("Не достаточно прав !");
+            if (val == 1) {
+              if (this.state.access.rem_item == 1) this._removeAll();
+              else Alert.alert("Не достаточно прав !");
             }
             if (val == 2) this._pickImage();
           }}
@@ -464,43 +498,75 @@ export default class ProductScreen extends React.Component {
         />
 
         <Dialog.Container visible={this.state.showModalCount}>
-          <Dialog.Title  style={{ color: "#000" }}>Введите кол-во товара</Dialog.Title>
-          <Dialog.Input style={{ color: "#000" }} keyboardType='numeric' onChangeText={(value) => {
-            this.setState({ amount: value });
-          }} />
-          <Dialog.Button label="Ok" onPress={() => {
-            this.setState({ showModalCount: false }, () => {
-              this._insertBouquet();
-            });
-          }} />
+          <Dialog.Title style={{ color: "#000" }}>
+            Введите кол-во товара
+          </Dialog.Title>
+          <Dialog.Input
+            style={{ color: "#000" }}
+            keyboardType="numeric"
+            onChangeText={(value) => {
+              this.setState({ amount: value });
+            }}
+          />
+          <Dialog.Button
+            label="Ok"
+            onPress={() => {
+              this.setState({ showModalCount: false }, () => {
+                this._insertBouquet();
+              });
+            }}
+          />
         </Dialog.Container>
 
         <Dialog.Container visible={this.state.showModalCount2}>
-          <Dialog.Title  style={{ color: "#000" }}>Введите кол-во товара</Dialog.Title>
-          <Dialog.Input style={{ color: "#000" }} keyboardType='numeric' value={this.state.changeAmount} onChangeText={(value) => {
-            this.setState({ changeAmount: value });
-          }} />
-          <Dialog.Button label="Ok" onPress={() => {
-            this.setState({ showModalCount2: false }, () => {
-              this._updateBouquet();
-            });
-          }} />
+          <Dialog.Title style={{ color: "#000" }}>
+            Введите кол-во товара
+          </Dialog.Title>
+          <Dialog.Input
+            style={{ color: "#000" }}
+            keyboardType="numeric"
+            value={this.state.changeAmount}
+            onChangeText={(value) => {
+              this.setState({ changeAmount: value });
+            }}
+          />
+          <Dialog.Button
+            label="Ok"
+            onPress={() => {
+              this.setState({ showModalCount2: false }, () => {
+                this._updateBouquet();
+              });
+            }}
+          />
         </Dialog.Container>
 
         <Dialog.Container visible={this.state.showModalTotalPrice}>
-          <Dialog.Title style={{ color: "#000" }}>Введите цену букета</Dialog.Title>
-          <Dialog.Input style={{ color: "#000" }} keyboardType='numeric' value={this.state.changeAmount2} onChangeText={(value) => {
-            this.setState({ changeAmount2: value, userPrice: value });
-          }} />
-          <Dialog.Button label="Ok" onPress={() => {
-            this.setState({ showModalTotalPrice: false }, () => {
-              setTotal(this.state.network.ip, this.state.checkid, this.state.changeAmount2).then((line) => {
-                console.log(line);
-              })
-            });
-          }} />
+          <Dialog.Title style={{ color: "#000" }}>
+            Введите цену букета
+          </Dialog.Title>
+          <Dialog.Input
+            style={{ color: "#000" }}
+            keyboardType="numeric"
+            value={this.state.changeAmount2}
+            onChangeText={(value) => {
+              this.setState({ changeAmount2: value, userPrice: value });
+            }}
+          />
+          <Dialog.Button
+            label="Ok"
+            onPress={() => {
+              this.setState({ showModalTotalPrice: false }, () => {
+                setTotal(
+                  this.state.network.ip,
+                  this.state.checkid,
+                  this.state.changeAmount2
+                ).then((line) => {
+                  console.log(line);
+                });
+              });
+            }}
+          />
         </Dialog.Container>
-
       </View>
     );
   }

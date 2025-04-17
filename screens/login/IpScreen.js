@@ -4,36 +4,30 @@ import {
   Dimensions,
   Image,
   KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   View,
-  Platform,
 } from "react-native";
-
-import * as Font from "expo-font";
 
 import { isIphoneX } from "../../components/isIphoneX.js";
 
 import Colors from "../../constants/Colors.js";
 
+const statusIOS = isIphoneX() ? 44 : 20;
 const { width: viewportWidth, height: viewportHeight } =
   Dimensions.get("window");
-const statusBarX = isIphoneX() ? 44 : 20;
+const contentHeight = viewportHeight - statusIOS - 56 - 56;
 
-const statusHeight =
-  Platform.OS === "ios" ? statusBarX : StatusBar.currentHeight;
-const contentHeight = viewportHeight - statusHeight - 56 - 56;
-
-import { retrieveData, storeData } from "../../services/Storage.js";
-
-import UiModalRadio from "../../components/ui/modal/ModalRadio.js";
-import UiTextInput from "../../components/ui/form/TextInput.js";
 import Loader from "../../components/ui/Loader.js";
 import UiButtonGreen from "../../components/ui/button/ButtonGreen.js";
 import UiHeader from "../../components/ui/header/Header.js";
 import UiLinkButton from "../../components/ui/button/LinkButton.js";
+import UiTextInput from "../../components/ui/form/TextInput.js";
+
+import { retrieveData, storeData } from "../../services/Storage.js";
 
 export default class IpScreen extends React.Component {
   static navigationOptions = {
@@ -41,7 +35,6 @@ export default class IpScreen extends React.Component {
   };
 
   state = {
-    fontsLoaded: false,
     isLoading: true,
     loginProgress: false,
     nameInputFocusValidation: true,
@@ -53,21 +46,12 @@ export default class IpScreen extends React.Component {
   };
 
   componentDidMount() {
-    if (!this.state.fontsLoaded) {
-      Font.loadAsync({
-        "Roboto-Medium": require("../../assets/fonts/Roboto-Medium.ttf"),
-        "Roboto-Regular": require("../../assets/fonts/Roboto-Regular.ttf"),
-      }).then(() => this.setState({ fontsLoaded: true }));
-    } else {
-      this.setState({ fontsLoaded: true });
-    }
-
     this.props.navigation.addListener("willFocus", this.load);
   }
 
   load = () => {
     this.setState({
-      fontsLoaded: false,
+      fontsLoaded: true,
       isLoading: true,
       loginProgress: false,
       nameInputFocusValidation: true,
@@ -77,6 +61,7 @@ export default class IpScreen extends React.Component {
     retrieveData("network").then((net) => {
       if (net) {
         this.setState({ ip: net.ip });
+        this.props.navigation.navigate("LogIn", { ip: net.ip });
       } else {
       }
     });
@@ -93,80 +78,69 @@ export default class IpScreen extends React.Component {
 
   render() {
     const { navigate } = this.props.navigation;
-    if (!this.state.fontsLoaded) {
-      return <View />;
-    } else {
-      return (
-        <View style={styles.container}>
-          <SafeAreaView style={styles.safeArea}>
-            <StatusBar barStyle="light-content" />
-            <Loader show={this.state.loginProgress} />
-            <UiHeader headerText="Подключение к серверу" />
-            <KeyboardAvoidingView
-              style={styles.content}
-              //behavior="padding"
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <UiHeader headerText="Подключение к серверу" />
+          <KeyboardAvoidingView
+            style={styles.content}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+          >
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardDismissMode="on-drag"
+              keyboardShouldPersistTaps="handled"
             >
-              <ScrollView
-                contentContainerStyle={styles.scrollContent}
-                keyboardDismissMode="on-drag"
-                keyboardShouldPersistTaps="handled"
-              >
-                <View style={styles.loginBar}>
-                  <View style={styles.logoContainer}>
-                    <Image
-                      style={styles.logo}
-                      source={require("../../assets/images/logo_florapoint_mobile.png")}
-                    ></Image>
-                  </View>
+              <View style={styles.loginBar}>
+                <View style={styles.logoContainer}>
+                  <Image
+                    style={styles.logo}
+                    source={require("../../assets/images/logo_florapoint_mobile.png")}
+                  ></Image>
+                </View>
 
-                  <View style={styles.form}>
-                    <View style={styles.input}>
-                      <UiTextInput
-                        backText="IP адрес сервера"
-                        type="custom"
-                        inputValue={this.state.ip}
-                        inputFocus={true}
-                        validationType="code6"
-                        callBack={(val) => this.setState({ ip: val })}
-                      />
-                    </View>
-
-                    <UiButtonGreen
-                      gButtonText="Войти"
-                      disabled={this.state.loginProgress}
-                      onPress={() => {
-                        this.LogIn(navigate);
-                      }}
+                <View style={styles.form}>
+                  <View style={styles.input}>
+                    <UiTextInput
+                      backText="IP адрес сервера"
+                      type="custom"
+                      inputValue={this.state.ip}
+                      inputFocus={true}
+                      validationType="code6"
+                      callBack={(val) => this.setState({ ip: val })}
                     />
                   </View>
-                </View>
 
-                <View style={styles.regLink}>
-                  <UiLinkButton
-                    linkPress={() => {
-                      Alert.alert(
-                        "Справка",
-                        "Если у вас нет соединения то проверьте:\n 1.Подключение телефона к одной сети сервера\n 2.Доступность сервера "
-                      );
+                  <UiButtonGreen
+                    gButtonText="Войти"
+                    disabled={this.state.loginProgress}
+                    onPress={() => {
+                      this.LogIn(navigate);
                     }}
-                    linkText="Нет соединения? "
-                    linkLink=""
                   />
                 </View>
-              </ScrollView>
-            </KeyboardAvoidingView>
-            {/*
-            <UiModalRadio
-            subtitle="Выберите пользователя"
-            modalChecked={this.state.selectedUser}
-            modalItems={this.state.usersItemList}
-            modalCallBack={(val) => this.setState({ login: val[1], selectedUser: val[0] })}
-            selectFunction={() => { this.setState({ modalUserVisible: !this.state.modalUserVisible }); }}
-            modalVisible={this.state.modalUserVisible} />*/}
-          </SafeAreaView>
-        </View>
-      );
-    }
+              </View>
+
+              <View style={styles.regLink}>
+                <UiLinkButton
+                  linkPress={() => {
+                    Alert.alert(
+                      "Справка",
+                      "Если у вас нет соединения то проверьте:\n 1.Подключение телефона к одной сети сервера\n 2.Доступность сервера "
+                    );
+                  }}
+                  linkText="Нет соединения? "
+                  linkLink=""
+                />
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+
+        {/* modals */}
+        <Loader show={this.state.loginProgress} />
+      </View>
+    );
   }
 }
 
@@ -176,9 +150,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.whiteColor,
   },
   safeArea: {
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    width: "100%",
     backgroundColor: Colors.whiteColor,
   },
+
   content: {
     flex: 1,
     paddingTop: 16,

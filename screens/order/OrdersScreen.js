@@ -14,14 +14,13 @@ import TabBarIcon from "../../components/TabBarIcon.js";
 import UiHeader from "../../components/ui/header/Header.js";
 import UiModalSelect from "../../components/ui/modal/ModalSelect.js";
 import UiProductCard from "../../components/ui/cards/ProductCard.js";
-import UiTextInput from '../../components/ui/form/TextInput.js';
+import UiTextInput from "../../components/ui/form/TextInput.js";
 import Colors from "../../constants/Colors.js";
 import UiDocsCard from "../../components/ui/cards/DocsCard.js";
 
-import { formatDateSQL } from '../../components/common/Date.js';
-import { retrieveData, Access } from '../../services/Storage.js'
+import { formatDateSQL } from "../../components/common/Date.js";
+import { retrieveData, Access } from "../../services/Storage.js";
 import { getAvailables } from "../../services/Orders";
-
 
 export default class OrdersScreen extends React.Component {
   static navigationOptions = {
@@ -52,19 +51,18 @@ export default class OrdersScreen extends React.Component {
 
   load = () => {
     retrieveData("user_access").then((_access) => {
-      if (_access) this.setState({ access: _access })
-    })
-    retrieveData('network').then((net) => {
+      if (_access) this.setState({ access: _access });
+    });
+    retrieveData("network").then((net) => {
       this.setState({ network: net });
       if (this.state.ordersList.length == 0) this.setState({ loader: true });
 
       getAvailables(net.ip).then((res) => {
         //console.log(res);
-        if (res.result) this.setState({ ordersList: res.result, loader: false });
-      })
-
-    })
-
+        if (res.result)
+          this.setState({ ordersList: res.result, loader: false });
+      });
+    });
 
     BackHandler.addEventListener("hardwareBackPress", () => {
       this.props.navigation.navigate("Main");
@@ -77,18 +75,17 @@ export default class OrdersScreen extends React.Component {
     let arr = [];
 
     if (_line.length > 0) {
-
       _arr.map((item) => {
         if (
-          (item.ORDERID.includes(_line)) ||
-          (item.RECEIVERADDRESS.includes(_line)) ||
-          (item.CUSTOMER.includes(_line)) ||
-          (item.NUMBER.includes(_line)) ||
-          (item.CUSTOMERPHONE.includes(_line))
+          item.ORDERID.includes(_line) ||
+          item.RECEIVERADDRESS.includes(_line) ||
+          item.CUSTOMER.includes(_line) ||
+          item.NUMBER.includes(_line) ||
+          item.CUSTOMERPHONE.includes(_line)
         ) {
-          arr.push(item)
+          arr.push(item);
         }
-      })
+      });
     } else {
       arr = this.state.ordersList;
     }
@@ -110,39 +107,39 @@ export default class OrdersScreen extends React.Component {
           }}
           address={item.RECEIVERADDRESS}
           client={item.CUSTOMER}
-          date={(item.TOTIME)}
+          date={item.TOTIME}
           delivery={item.DOSTAVKA == 1}
           number={item.NUMBER}
           statusDone={item.ORDERREADY == 1}
           phone={item.CUSTOMERPHONE}
         />
-      )
-    })
+      );
+    });
 
     return (
       <View style={styles.container}>
-        <UiHeader headerText="Заказы" />
-
-        <View style={{ padding: 5 }}>
-          <UiTextInput
-            placeholder={"Поиск"}
-            inputValue={this.state.searchLine}
-            disabledValidation={true}
-            callBack={(val) => {
-              this.setState({ searchLine: val })
-            }}
-          />
-        </View>
-
-
         <SafeAreaView style={styles.safeArea}>
+          <UiHeader headerText="Заказы" />
+          <View style={{ padding: 5 }}>
+            <UiTextInput
+              placeholder={"Поиск"}
+              inputValue={this.state.searchLine}
+              disabledValidation={true}
+              callBack={(val) => {
+                this.setState({ searchLine: val });
+              }}
+            />
+          </View>
           <View style={styles.content}>
             <ScrollView
               contentContainerStyle={{ paddingVertical: 16 }}
               style={styles.scrollView}
             >
-
-              {this.state.access.enter_order == 1 ? list : <Text>Не достаточно прав</Text>}
+              {this.state.access.enter_order == 1 ? (
+                list
+              ) : (
+                <Text>Не достаточно прав</Text>
+              )}
             </ScrollView>
             <TouchableOpacity
               onPress={() => this.setState({ modalAddActive: true })}
@@ -157,7 +154,7 @@ export default class OrdersScreen extends React.Component {
               style={styles.tabButton}
             >
               <TabBarIcon
-              size={25}
+                size={25}
                 color={Colors.darkGrayColor}
                 name="checkmark-circle-outline"
               />
@@ -171,7 +168,11 @@ export default class OrdersScreen extends React.Component {
               onPress={() => navigate("Orders")}
               style={styles.tabButton}
             >
-              <TabBarIcon size={25} color={Colors.greenColor} name="md-list-outline" />
+              <TabBarIcon
+                size={25}
+                color={Colors.greenColor}
+                name="list-outline"
+              />
               <Text
                 style={[styles.tabButtonText, { color: Colors.greenColor }]}
               >
@@ -183,14 +184,17 @@ export default class OrdersScreen extends React.Component {
               onPress={() => navigate("Settings")}
               style={styles.tabButton}
             >
-              <TabBarIcon size={25} color={Colors.darkGrayColor} name="settings" />
+              <TabBarIcon
+                size={25}
+                color={Colors.darkGrayColor}
+                name="settings"
+              />
               <Text
                 style={[styles.tabButtonText, { color: Colors.darkGrayColor }]}
               >
                 Настройки
               </Text>
             </TouchableOpacity>
-
           </View>
         </SafeAreaView>
 
@@ -203,13 +207,19 @@ export default class OrdersScreen extends React.Component {
             console.log(val);
             this.setState({ modalAddActive: false });
             if (val == 0) {
-              if (this.state.access.enter_sel == 1) this.props.navigation.navigate("Selling"); else Alert.alert("Не достаточно прав !")
+              if (this.state.access.enter_sel == 1)
+                this.props.navigation.navigate("Selling");
+              else Alert.alert("Не достаточно прав !");
             }
             if (val == 1) {
-              if (this.state.access.add_item == 1) this.props.navigation.navigate("NewProduct"); else Alert.alert("Не достаточно прав !")
+              if (this.state.access.add_item == 1)
+                this.props.navigation.navigate("NewProduct");
+              else Alert.alert("Не достаточно прав !");
             }
             if (val == 2) {
-              if (this.state.access.enter_order == 1) this.props.navigation.navigate("NewOrder"); else Alert.alert("Не достаточно прав !")
+              if (this.state.access.enter_order == 1)
+                this.props.navigation.navigate("NewOrder");
+              else Alert.alert("Не достаточно прав !");
             }
           }}
           title="Добавить:"
