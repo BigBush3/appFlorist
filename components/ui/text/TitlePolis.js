@@ -1,26 +1,24 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import AppLoading from "expo-app-loading";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
-import * as Font from 'expo-font';
+import * as Font from "expo-font";
 
 export default class UiTitlePolis extends React.Component {
-  
   state = { fontsLoaded: false };
 
-  constructor(props){
+  constructor(props) {
     super(props);
   }
 
-  componentDidMount() { 
+  componentDidMount() {
     Font.loadAsync({
-      'Roboto-Medium': require('../../../assets/fonts/Roboto-Medium.ttf'),
-    }).then( () => this.setState( { fontsLoaded: true } ) );
+      "Roboto-Medium": require("../../../assets/fonts/Roboto-Medium.ttf"),
+    }).then(() => this.setState({ fontsLoaded: true }));
   }
 
   render() {
-    if( !this.state.fontsLoaded ) {
-      return <AppLoading/>
+    if (!this.state.fontsLoaded) {
+      return <View />;
     }
 
     return (
@@ -40,8 +38,7 @@ const styles = StyleSheet.create({
   titlePolisText: {
     fontSize: 24,
     lineHeight: 30,
-    color: 'rgb(16,0,43)',
-    fontFamily: 'Roboto-Medium',
+    color: "rgb(16,0,43)",
+    fontFamily: "Roboto-Medium",
   },
-
 });

@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { gestureHandlerRootHOC } from "react-native-gesture-handler";
 
 import Dialog from "react-native-dialog";
 import UiModalRadio from "../../../components/ui/modal/ModalRadio.js";

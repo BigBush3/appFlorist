@@ -1,34 +1,31 @@
-import React from 'react';
-import { StyleSheet, View, Image, Text } from 'react-native';
-import AppLoading from "expo-app-loading";
+import React from "react";
+import { StyleSheet, View, Image, Text } from "react-native";
 
-import * as Font from 'expo-font';
+import * as Font from "expo-font";
 
-import iconError from '../../../assets/images/ui/cancel-2x.png';
+import iconError from "../../../assets/images/ui/cancel-2x.png";
 
 export default class UiErrorCard extends React.Component {
+  state = { fontsLoaded: false };
 
-  state = { fontsLoaded: false, }
-
-  constructor(props){
+  constructor(props) {
     super(props);
   }
 
   componentDidMount() {
     Font.loadAsync({
-      'Roboto-Medium': require('../../../assets/fonts/Roboto-Medium.ttf'),
-      'Roboto-Regular': require('../../../assets/fonts/Roboto-Regular.ttf'),
-    }).then( () => this.setState( { fontsLoaded: true } ) );
+      "Roboto-Medium": require("../../../assets/fonts/Roboto-Medium.ttf"),
+      "Roboto-Regular": require("../../../assets/fonts/Roboto-Regular.ttf"),
+    }).then(() => this.setState({ fontsLoaded: true }));
   }
 
   render() {
-    if( !this.state.fontsLoaded ) {
-      return <AppLoading/>
+    if (!this.state.fontsLoaded) {
+      return <View />;
     }
 
     return (
       <View style={styles.container}>
-
         <View style={styles.content}>
           <View style={styles.topText}>
             <Image style={styles.topTextImage} source={iconError} />
@@ -36,7 +33,6 @@ export default class UiErrorCard extends React.Component {
             <Text style={styles.topTextText}>{this.props.errorText}</Text>
           </View>
         </View>
-
       </View>
     );
   }
@@ -45,36 +41,36 @@ export default class UiErrorCard extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   content: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   topText: {
     flexGrow: 1,
     flexShrink: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   topTextImage: {
     width: 48,
     height: 48,
     marginBottom: 24,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   topTextTitle: {
-    fontFamily: 'Roboto-Medium',
+    fontFamily: "Roboto-Medium",
     fontSize: 24,
     lineHeight: 30,
-    color: 'rgb(16,0,43)',
+    color: "rgb(16,0,43)",
     marginBottom: 8,
   },
   topTextText: {
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     fontSize: 18,
     lineHeight: 24,
-    color: 'rgb(138,149,157)',
+    color: "rgb(138,149,157)",
     marginBottom: 24,
   },
   bottomButton: {
@@ -82,5 +78,4 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     padding: 16,
   },
-
 });

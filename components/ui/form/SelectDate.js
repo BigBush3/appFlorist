@@ -1,31 +1,29 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
-import AppLoading from "expo-app-loading";
+import React from "react";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 
-import * as Font from 'expo-font';
+import * as Font from "expo-font";
 
-import selectIcon from '../../../assets/images/ui/rectangle-2x.png';
-import dateIcon from '../../../assets/images/polis/event-2x.png';
+import selectIcon from "../../../assets/images/ui/rectangle-2x.png";
+import dateIcon from "../../../assets/images/polis/event-2x.png";
 
 export default class UiSelectDate extends React.Component {
-  
-  state = { 
+  state = {
     fontsLoaded: false,
   };
 
-  constructor(props){
+  constructor(props) {
     super(props);
   }
 
-  componentDidMount() { 
+  componentDidMount() {
     Font.loadAsync({
-      'Roboto-Regular': require('../../../assets/fonts/Roboto-Regular.ttf'),
-    }).then( () => this.setState( { fontsLoaded: true } ) );
+      "Roboto-Regular": require("../../../assets/fonts/Roboto-Regular.ttf"),
+    }).then(() => this.setState({ fontsLoaded: true }));
   }
 
   render() {
-    if( !this.state.fontsLoaded ) {
-      return <AppLoading/>
+    if (!this.state.fontsLoaded) {
+      return <View />;
     }
 
     return (
@@ -41,38 +39,37 @@ export default class UiSelectDate extends React.Component {
 const styles = StyleSheet.create({
   select: {
     height: 48,
-    width: '100%',
+    width: "100%",
     borderWidth: 1,
-    borderColor: 'rgb(226,224,229)',
+    borderColor: "rgb(226,224,229)",
     borderRadius: 8,
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   dateImage: {
     width: 24,
     height: 24,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     flexGrow: 0,
     flexShrink: 0,
     marginRight: 16,
   },
   selectText: {
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     fontSize: 16,
     lineHeight: 22,
-    color: 'rgb(138,149,157)',
+    color: "rgb(138,149,157)",
     flexGrow: 1,
     flexShrink: 1,
   },
   selectImage: {
     width: 24,
     height: 24,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     flexGrow: 0,
     flexShrink: 0,
   },
-
 });

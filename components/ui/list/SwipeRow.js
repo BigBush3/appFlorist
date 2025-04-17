@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import { Animated, StyleSheet, Text, View, I18nManager } from "react-native";
 
-import {
+/* import {
   RectButton,
   GestureHandlerRootView,
   Swipeable,
-} from "react-native-gesture-handler";
+} from "react-native-gesture-handler"; */
 
 import Icon from "react-native-vector-icons/MaterialIcons";
 

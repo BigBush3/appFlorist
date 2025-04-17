@@ -1,39 +1,41 @@
-import React from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
-import AppLoading from "expo-app-loading";
+import React from "react";
+import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
 
-import * as Font from 'expo-font';
+import * as Font from "expo-font";
 
-import filterIcon from '../../../assets/images/ui/filter-2x.png';
-import filterActiveIcon from '../../../assets/images/ui/filterActive-2x.png';
+import filterIcon from "../../../assets/images/ui/filter-2x.png";
+import filterActiveIcon from "../../../assets/images/ui/filterActive-2x.png";
 
 export default class UiFilterButton extends React.Component {
-  
   state = { fontsLoaded: false };
 
-  constructor(props){
+  constructor(props) {
     super(props);
   }
 
-  componentDidMount() { 
+  componentDidMount() {
     Font.loadAsync({
-      'Roboto-Regular': require('../../../assets/fonts/Roboto-Regular.ttf'),
-    }).then( () => this.setState( { fontsLoaded: true } ) );
+      "Roboto-Regular": require("../../../assets/fonts/Roboto-Regular.ttf"),
+    }).then(() => this.setState({ fontsLoaded: true }));
   }
 
   render() {
-    if( !this.state.fontsLoaded ) {
-      return <AppLoading/>
+    if (!this.state.fontsLoaded) {
+      return <View />;
     }
 
     return (
       <View style={styles.filter}>
         <Text style={styles.filterText}>{this.props.filterText}</Text>
-        <TouchableOpacity style={styles.filterButton} onPress={this.props.filterPress}>
-          {this.props.isFiltering? 
-            <Image style={styles.filterIcon} source={filterIcon} /> :
-            <Image style={styles.filterIcon} source={filterActiveIcon} /> 
-          }
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={this.props.filterPress}
+        >
+          {this.props.isFiltering ? (
+            <Image style={styles.filterIcon} source={filterIcon} />
+          ) : (
+            <Image style={styles.filterIcon} source={filterActiveIcon} />
+          )}
         </TouchableOpacity>
       </View>
     );
@@ -45,16 +47,16 @@ const styles = StyleSheet.create({
     height: 48,
     paddingLeft: 16,
     paddingVertical: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgb(245,245,245)',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgb(245,245,245)",
   },
   filterText: {
-    fontFamily: 'Roboto-Regular',
+    fontFamily: "Roboto-Regular",
     fontSize: 14,
     lineHeight: 20,
-    color: 'rgb(138,149,157)',
+    color: "rgb(138,149,157)",
     flexGrow: 1,
     flexShrink: 1,
   },
@@ -63,13 +65,12 @@ const styles = StyleSheet.create({
     height: 42,
     flexGrow: 0,
     flexShrink: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   filterIcon: {
     width: 24,
     height: 24,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
-
 });

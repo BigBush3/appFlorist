@@ -7,11 +7,11 @@ import {
   View,
 } from "react-native";
 
-import {
+/* import {
   RectButton,
   GestureHandlerRootView,
   Swipeable,
-} from "react-native-gesture-handler";
+} from "react-native-gesture-handler"; */
 import { Ionicons } from "@expo/vector-icons";
 
 import Colors from "../../../constants/Colors";
