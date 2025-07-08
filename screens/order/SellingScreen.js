@@ -13,9 +13,6 @@ import {
 } from "react-native";
 
 import Dialog from "react-native-dialog";
-import * as ImagePicker from 'expo-image-picker';
-import Constants from 'expo-constants';
-import * as Permissions from 'expo-permissions';
 
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -25,18 +22,35 @@ import demoImage from "../../assets/images/icon.png";
 import Loader from "../../components/ui/Loader.js";
 import TabBarIcon from "../../components/TabBarIcon.js";
 import UiButtonGreen from "../../components/ui/button/ButtonGreen.js";
-import UiTextInput from '../../components/ui/form/TextInput.js';
+import UiTextInput from "../../components/ui/form/TextInput.js";
 import UiHeader from "../../components/ui/header/Header.js";
 import UiModalSelect from "../../components/ui/modal/ModalSelect.js";
-import UiModalRadio from '../../components/ui/modal/ModalRadio.js';
-import UiModalRadioPay from '../../components/ui/modal/ModalRadioPay.js';
+import UiModalRadio from "../../components/ui/modal/ModalRadio.js";
+import UiModalRadioPay from "../../components/ui/modal/ModalRadioPay.js";
 
 import Colors from "../../constants/Colors.js";
 import UiSwipeList from "../../components/ui/list/SwipeList";
 
-import { retrieveData, uploadImageAsync } from '../../services/Storage.js'
-import { newCheck, discountList, setDiscount, bouquetList, insertProduct, insertBouquet, removeProduct, updateProduct, setTotal, dontSave, save, setClient, getPaymentsType, addPayment, refrashList, close } from "../../services/Check";
-import { getClients, searchClient, refreshInfo, } from "../../services/Orders";
+import { retrieveData, uploadImageAsync } from "../../services/Storage.js";
+import {
+  newCheck,
+  discountList,
+  setDiscount,
+  bouquetList,
+  insertProduct,
+  insertBouquet,
+  removeProduct,
+  updateProduct,
+  setTotal,
+  dontSave,
+  save,
+  setClient,
+  getPaymentsType,
+  addPayment,
+  refrashList,
+  close,
+} from "../../services/Check";
+import { getClients, searchClient, refreshInfo } from "../../services/Orders";
 import { getProductsList } from "../../services/Bouquet";
 
 export default class SellingScreen extends React.Component {
@@ -94,8 +108,8 @@ export default class SellingScreen extends React.Component {
 
     settings: {
       keyboardType: 0,
-      leftItems: 0
-    }
+      leftItems: 0,
+    },
   };
 
   componentDidMount() {
@@ -108,40 +122,43 @@ export default class SellingScreen extends React.Component {
   }
 
   load = () => {
-
     retrieveData("fl_settings").then((data) => {
       if (data) {
-        if (data !== null && typeof data !== undefined) this.setState({ settings: data })
+        if (data !== null && typeof data !== undefined)
+          this.setState({ settings: data });
       }
-    })
+    });
 
-    retrieveData('user').then((_user) => {
-      console.log('user', _user)
+    retrieveData("user").then((_user) => {
+      console.log("user", _user);
       if (_user) {
         this.setState({
-          userId: _user.USERSID
-        })
+          userId: _user.USERSID,
+        });
       }
-    })
+    });
 
-    retrieveData('network').then((net) => {
+    retrieveData("network").then((net) => {
       this.setState({ loader: true, network: net });
 
       newCheck(net.ip, this.state.userId).then((res) => {
-        console.log(res)
+        console.log(res);
         if (res.findDay) {
-          if (res.findDay[0]['1'] == 0) {
+          if (res.findDay[0]["1"] == 0) {
             Alert.alert(
               "Внимание",
               "смена еще не открыта",
               [
-                { text: "OK", onPress: () => this.props.navigation.navigate("Main") }
+                {
+                  text: "OK",
+                  onPress: () => this.props.navigation.navigate("Main"),
+                },
               ],
               { cancelable: false }
             );
           } else {
             this.setState({
-              checkid: res.result[0]['CHECKID'],
+              checkid: res.result[0]["CHECKID"],
               incomePayments: 0,
               totalUserPrice: null,
               clientName: "",
@@ -149,130 +166,116 @@ export default class SellingScreen extends React.Component {
               discount: 0,
               totalPrice: 0,
               discountName: null,
+            });
+            if (res.result[0]["CHECKID"] == "")
+              Alert.alert("Внимание CHECKID пустой");
 
-            })
-            if (res.result[0]['CHECKID'] == "") Alert.alert("Внимание CHECKID пустой");
-
-            getPaymentsType(net.ip, res.result[0]['CHECKID']).then((res) => {
-              console.log("getPaymentsType", res)
+            getPaymentsType(net.ip, res.result[0]["CHECKID"]).then((res) => {
+              console.log("getPaymentsType", res);
               if (res.result) {
                 res.result.map((item) => {
                   item.label = `${item.NAME}`;
-                })
+                });
                 this.setState({ paymentsList: res.result });
               }
-
-
-            })
+            });
           }
         } else {
           Alert.alert(
             "Внимание",
             "смена еще не открыта",
             [
-              { text: "OK", onPress: () => this.props.navigation.navigate("Main") }
+              {
+                text: "OK",
+                onPress: () => this.props.navigation.navigate("Main"),
+              },
             ],
             { cancelable: false }
           );
         }
-
-      })
+      });
 
       getProductsList(net.ip, this.state.settings.leftItems).then((res) => {
         if (res.result) {
           res.result.map((item) => {
             item.label = `${item.NAME} руб.`;
-          })
+          });
           this.setState({ productsList: res.result, loader: false });
         }
-      })
+      });
 
       bouquetList(net.ip).then((res) => {
-
         if (res.result) {
           res.result.map((item) => {
             item.label = `${item.NAME} #${item.CHECKID}`;
-          })
+          });
           this.setState({ productsBouquetList: res.result, loader: false });
         }
-      })
+      });
 
       discountList(net.ip).then((res) => {
-        console.log("discountList", res)
+        console.log("discountList", res);
         if (res.result) {
           res.result.map((item) => {
             item.label = `${item.NAME}`;
-          })
+          });
           this.setState({ discountList: res.result });
         }
-      })
-
+      });
 
       getClients(net.ip).then((res) => {
         let arr = [];
         res.map((item) => {
           item.label = `${item.CLIENT}`;
           item.value = item.CLIENTID;
-        })
+        });
         this.setState({ usersItemList: res });
       });
-
-
-    })
-
+    });
 
     BackHandler.addEventListener("hardwareBackPress", () => {
-
       Alert.alert(
         "Внимание",
         "Сохранить изменения ?",
         [
           { text: "Да", onPress: () => this._save() },
-          { text: "Нет", onPress: () => this._exitWOS() }
+          { text: "Нет", onPress: () => this._exitWOS() },
         ],
         { cancelable: false }
       );
-
 
       return true;
     });
   };
 
-
   _exitWOS() {
     this.setState({ loader: true });
-    dontSave(
-      this.state.network.ip,
-      this.state.checkid,
-      this.state.userId
-    ).then((res) => {
-      this.setState({ bouquetList: [], loader: false });
-      this.props.navigation.navigate("Main");
-    })
+    dontSave(this.state.network.ip, this.state.checkid, this.state.userId).then(
+      (res) => {
+        this.setState({ bouquetList: [], loader: false });
+        this.props.navigation.navigate("Main");
+      }
+    );
   }
 
   _save() {
     this.setState({ loader: true });
-    save(
-      this.state.network.ip,
-      this.state.checkid,
-      this.state.CheckName
-    ).then((res) => {
-      this.setState({ bouquetList: [], loader: false });
-      this.props.navigation.navigate("Main");
-    })
+    save(this.state.network.ip, this.state.checkid, this.state.CheckName).then(
+      (res) => {
+        this.setState({ bouquetList: [], loader: false });
+        this.props.navigation.navigate("Main");
+      }
+    );
   }
 
   _close() {
     this.setState({ loader: true });
-    close(
-      this.state.network.ip,
-      this.state.checkid,
-      this.state.userId
-    ).then((res) => {
-      this.setState({ bouquetList: [], loader: false });
-      this.props.navigation.navigate("Main");
-    })
+    close(this.state.network.ip, this.state.checkid, this.state.userId).then(
+      (res) => {
+        this.setState({ bouquetList: [], loader: false });
+        this.props.navigation.navigate("Main");
+      }
+    );
   }
 
   _insertProduct() {
@@ -296,11 +299,14 @@ export default class SellingScreen extends React.Component {
         id: _CHECKITEMID,
         title: this.state.selectedProduct.NAME,
         num: this.state.amount,
-        price: this.state.price
+        price: this.state.price,
       });
       arr.map((item) => {
-        tPrice = parseFloat(tPrice.toString().replace(',', '.')) + (parseFloat(item.price.toString().replace(',', '.')) * (parseFloat(item.num.toString().replace(',', '.'))));
-      })
+        tPrice =
+          parseFloat(tPrice.toString().replace(",", ".")) +
+          parseFloat(item.price.toString().replace(",", ".")) *
+            parseFloat(item.num.toString().replace(",", "."));
+      });
 
       this.setState({
         bouquetList: arr,
@@ -308,14 +314,14 @@ export default class SellingScreen extends React.Component {
         changeAmount: 0,
         changeAmount2: 0,
       });
-    })
+    });
   }
 
   _insertBouquet() {
     insertBouquet(
       this.state.network.ip,
       this.state.checkid,
-      this.state.bouquetcheckid,
+      this.state.bouquetcheckid
     ).then((res) => {
       console.log("insertProduct", res);
       let arr = this.state.bouquetList;
@@ -324,11 +330,14 @@ export default class SellingScreen extends React.Component {
         id: this.state.selectedProduct.CHECKID,
         title: `${this.state.selectedProduct.NAME} #${this.state.selectedProduct.CHECKID}`,
         num: 1,
-        price: this.state.price
+        price: this.state.price,
       });
       arr.map((item) => {
-        tPrice = parseFloat(tPrice.toString().replace(',', '.')) + (parseFloat(item.price.toString().replace(',', '.')) * parseFloat(item.num.toString().replace(',', '.')));
-      })
+        tPrice =
+          parseFloat(tPrice.toString().replace(",", ".")) +
+          parseFloat(item.price.toString().replace(",", ".")) *
+            parseFloat(item.num.toString().replace(",", "."));
+      });
 
       this.setState({
         bouquetList: arr,
@@ -336,33 +345,32 @@ export default class SellingScreen extends React.Component {
         changeAmount: 0,
         changeAmount2: 0,
       });
-    })
+    });
   }
 
   _removeFromCheck(_item) {
+    removeProduct(this.state.network.ip, _item.id).then((res) => {
+      console.log("removeProduct", res);
+      let arr = this.state.bouquetList;
+      let _index = 0;
+      let tPrice = 0;
 
-    removeProduct(
-      this.state.network.ip, _item.id).then((res) => {
-        console.log("removeProduct", res);
-        let arr = this.state.bouquetList;
-        let _index = 0;
-        let tPrice = 0;
-
-        arr.map((item, index) => {
-          if (item.id == _item.id) _index = index;
-        })
-        arr.splice(_index, 1);
-        arr.map((item) => {
-          tPrice = parseFloat(tPrice) + (parseFloat(item.price) * (parseFloat(item.num)));
-        })
-        this.setState({ bouquetList: arr, totalPrice: tPrice })
-      })
+      arr.map((item, index) => {
+        if (item.id == _item.id) _index = index;
+      });
+      arr.splice(_index, 1);
+      arr.map((item) => {
+        tPrice =
+          parseFloat(tPrice) + parseFloat(item.price) * parseFloat(item.num);
+      });
+      this.setState({ bouquetList: arr, totalPrice: tPrice });
+    });
   }
 
   _removeAll() {
     this.state.bouquetList.map((item) => {
       this._removeFromCheck(item);
-    })
+    });
   }
 
   _updateProduct() {
@@ -371,39 +379,48 @@ export default class SellingScreen extends React.Component {
       this.state.selected.id,
       this.state.changeAmount,
       this.state.selected.price,
-      (this.state.changeAmount * this.state.selected.price)
+      this.state.changeAmount * this.state.selected.price
     );
     updateProduct(
-      this.state.network.ip, this.state.selected.id, this.state.changeAmount, this.state.selected.price, (this.state.changeAmount * this.state.selected.price)).then((res) => {
-        console.log("_updateProduct", res);
+      this.state.network.ip,
+      this.state.selected.id,
+      this.state.changeAmount,
+      this.state.selected.price,
+      this.state.changeAmount * this.state.selected.price
+    ).then((res) => {
+      console.log("_updateProduct", res);
 
-        let arr = this.state.bouquetList;
-        let _index = 0;
-        let tPrice = 0;
+      let arr = this.state.bouquetList;
+      let _index = 0;
+      let tPrice = 0;
 
-
-        arr.map((item, index) => {
-          if (item.id == this.state.selected.id) _index = index;
-        })
-        arr[_index].num = this.state.changeAmount;
-        arr.map((item) => {
-          tPrice = parseFloat(tPrice) + (parseFloat(item.price) * (parseFloat(item.num)));
-        })
-        this.setState({
-          bouquetList: arr,
-          totalPrice: tPrice,
-          changeAmount: 0,
-          changeAmount2: 0,
-        })
-      })
+      arr.map((item, index) => {
+        if (item.id == this.state.selected.id) _index = index;
+      });
+      arr[_index].num = this.state.changeAmount;
+      arr.map((item) => {
+        tPrice =
+          parseFloat(tPrice) + parseFloat(item.price) * parseFloat(item.num);
+      });
+      this.setState({
+        bouquetList: arr,
+        totalPrice: tPrice,
+        changeAmount: 0,
+        changeAmount2: 0,
+      });
+    });
   }
 
   _addClient() {
-    setClient(this.state.network.ip, this.state.checkid, this.state.clientId).then((res) => {
+    setClient(
+      this.state.network.ip,
+      this.state.checkid,
+      this.state.clientId
+    ).then((res) => {
       console.log("setClient", res);
 
       refreshInfo(this.state.network.ip, this.state.checkid).then((inf) => {
-        console.log("info", inf)
+        console.log("info", inf);
         if (inf.result) {
           let arr = [];
           inf.result.map((item) => {
@@ -411,26 +428,27 @@ export default class SellingScreen extends React.Component {
               id: item.CHECKITEMID,
               title: item.NAME,
               num: item.AMOUNT,
-              price: item.PRICE
+              price: item.PRICE,
             });
-          })
+          });
           this.setState({
             bouquetList: arr,
-          })
-
+          });
         }
-      })
-
-
-    })
+      });
+    });
   }
 
   _addDiscount() {
-    setDiscount(this.state.network.ip, this.state.checkid, this.state.discountId).then((res) => {
+    setDiscount(
+      this.state.network.ip,
+      this.state.checkid,
+      this.state.discountId
+    ).then((res) => {
       console.log("setDiscount", res);
 
       refreshInfo(this.state.network.ip, this.state.checkid).then((inf) => {
-        console.log("info", inf)
+        console.log("info", inf);
         if (inf.result) {
           let arr = [];
           inf.result.map((item) => {
@@ -438,41 +456,43 @@ export default class SellingScreen extends React.Component {
               id: item.CHECKITEMID,
               title: item.NAME,
               num: item.AMOUNT,
-              price: item.PRICE
+              price: item.PRICE,
             });
-          })
+          });
           this.setState({
             bouquetList: arr,
-          })
-
+          });
         }
-      })
-
-    })
+      });
+    });
   }
 
   _addPayment(changeAmount3) {
-    addPayment(this.state.network.ip, this.state.checkid, this.state.paymentid, changeAmount3).then((res) => {
-
-      let current = (this.state.incomePayments);
+    addPayment(
+      this.state.network.ip,
+      this.state.checkid,
+      this.state.paymentid,
+      changeAmount3
+    ).then((res) => {
+      let current = this.state.incomePayments;
       current = parseFloat(current) + parseFloat(changeAmount3);
       if (current >= this.state.totalPrice) {
         Alert.alert("Внимание", "Чек полностью оплачен");
         this._close();
+        this.setState({ modalPayTypeVisible: false });
       } else {
-        this.setState({ incomePayments: current })
+        this.setState({ incomePayments: current });
       }
 
       console.log("addPayment", res);
-    })
+    });
   }
 
   _getItemsInCheck() {
     refrashList(this.state.network.ip, this.state.checkid).then((res) => {
       console.log("refrashList", res);
-    })
+    });
   }
-
 
   render() {
     const { navigate } = this.props.navigation;
@@ -488,11 +508,10 @@ export default class SellingScreen extends React.Component {
               "Сохранить изменения ?",
               [
                 { text: "Да", onPress: () => this._save() },
-                { text: "Нет", onPress: () => this._exitWOS() }
+                { text: "Нет", onPress: () => this._exitWOS() },
               ],
               { cancelable: false }
             );
-
           }}
           btnRight="close"
           headerText="Оформление продажи"
@@ -507,63 +526,86 @@ export default class SellingScreen extends React.Component {
                 <View style={styles.info}>
                   <View style={styles.infoWrap}>
                     <Text style={styles.infoText}>
-                      Чек № {" "}
-                      <Text style={styles.infoTextMark}>{this.state.checkid}</Text>
+                      Чек №{" "}
+                      <Text style={styles.infoTextMark}>
+                        {this.state.checkid}
+                      </Text>
                     </Text>
-                    <Text style={styles.infoText}>
-                      Имя чека{" "}
-                    </Text>
+                    <Text style={styles.infoText}>Имя чека </Text>
                     <UiTextInput
-
                       inputValue={this.state.CheckName}
-
                       callBack={(val) => {
-                        this.setState({ CheckName: val })
+                        this.setState({ CheckName: val });
                       }}
                     />
 
-
                     <Text style={styles.infoText}>
-                      Клиент: {" "}
-                      <Text style={styles.infoTextMark}>{this.state.clientName}</Text>
+                      Клиент:{" "}
+                      <Text style={styles.infoTextMark}>
+                        {this.state.clientName}
+                      </Text>
                     </Text>
 
                     <Text style={styles.infoText}>
                       Кол-во позиций в чеке:{" "}
-                      <Text style={styles.infoTextMark}>{this.state.bouquetList.length}</Text>
+                      <Text style={styles.infoTextMark}>
+                        {this.state.bouquetList.length}
+                      </Text>
                     </Text>
                     <Text style={styles.infoText}>
                       Сумма:{" "}
-                      <Text style={styles.infoTextMark}>{this.state.totalUserPrice ? this.state.totalUserPrice : this.state.totalPrice} руб.</Text>
+                      <Text style={styles.infoTextMark}>
+                        {this.state.totalUserPrice
+                          ? this.state.totalUserPrice
+                          : this.state.totalPrice}{" "}
+                        руб.
+                      </Text>
                     </Text>
-                    {this.state.discountName ?
+                    {this.state.discountName ? (
                       <Text style={styles.infoText}>
                         Скидка:{" "}
-                        <Text style={styles.infoTextMark}>{this.state.discountName ? this.state.discountName : this.state.discountName}  </Text>
+                        <Text style={styles.infoTextMark}>
+                          {this.state.discountName
+                            ? this.state.discountName
+                            : this.state.discountName}{" "}
+                        </Text>
                       </Text>
-                      : null}
+                    ) : null}
                   </View>
                 </View>
                 <View style={styles.info}>
                   <View style={styles.infoWrap}>
-                    <Text style={styles.infoTitle}>Список товаров в букете</Text>
+                    <Text style={styles.infoTitle}>
+                      Список товаров в букете
+                    </Text>
                     <UiSwipeList
                       swipeList={this.state.bouquetList}
                       onDelete={(id) => this._removeFromCheck(id)}
-                      onEdit={(item) => this.setState({ selected: item, changeAmount: item.num, showModalCount2: true })}
+                      onEdit={(item) =>
+                        this.setState({
+                          selected: item,
+                          changeAmount: item.num,
+                          showModalCount2: true,
+                        })
+                      }
                     />
                   </View>
                 </View>
 
                 <View style={styles.info}>
-                  <UiButtonGreen gButtonText="Добавить букет" o onPress={() => this.setState({ modalAddActive2: true })} />
+                  <UiButtonGreen
+                    gButtonText="Добавить букет"
+                    o
+                    onPress={() => this.setState({ modalAddActive2: true })}
+                  />
                 </View>
-
 
                 <View style={styles.info}>
-                  <UiButtonGreen gButtonText="Оплатить" onPress={() => this.setState({ modalPayTypeVisible: true })} />
+                  <UiButtonGreen
+                    gButtonText="Оплатить"
+                    onPress={() => this.setState({ modalPayTypeVisible: true })}
+                  />
                 </View>
-
               </View>
             </ScrollView>
             <TouchableOpacity
@@ -573,31 +615,31 @@ export default class SellingScreen extends React.Component {
               <TabBarIcon color={Colors.whiteColor} name="add" />
             </TouchableOpacity>
           </View>
-
-
         </SafeAreaView>
 
         {/* modals */}
         <Loader show={this.state.loader} />
-
-
 
         <UiModalRadio
           subtitle="Выбрать букет"
           modalChecked={[]}
           modalItems={this.state.productsBouquetList}
           modalCallBack={(val) => {
-            console.log(val.PRICE, val)
-            this.setState({
-              selectedProduct: val,
-              bouquetcheckid: val.CHECKID,
-              price: parseFloat(val.TOTAL)
-
-            }, () => {
-              this._insertBouquet();
-            });
+            console.log(val.PRICE, val);
+            this.setState(
+              {
+                selectedProduct: val,
+                bouquetcheckid: val.CHECKID,
+                price: parseFloat(val.TOTAL),
+              },
+              () => {
+                this._insertBouquet();
+              }
+            );
           }}
-          selectFunction={() => { this.setState({ modalAddActive2: !this.state.modalAddActive2 }); }}
+          selectFunction={() => {
+            this.setState({ modalAddActive2: !this.state.modalAddActive2 });
+          }}
           modalVisible={this.state.modalAddActive2}
         />
 
@@ -606,11 +648,18 @@ export default class SellingScreen extends React.Component {
           modalChecked={[]}
           modalItems={this.state.productsList}
           modalCallBack={(val) => {
-            console.log(val.PRICE, val)
+            console.log(val.PRICE, val);
             val.id = val.ITEMID;
-            this.setState({ selectedProduct: val, itemid: val.ITEMID, price: parseFloat(val.PRICE), showModalCount: true });
+            this.setState({
+              selectedProduct: val,
+              itemid: val.ITEMID,
+              price: parseFloat(val.PRICE),
+              showModalCount: true,
+            });
           }}
-          selectFunction={() => { this.setState({ modalAddActive: !this.state.modalAddActive }); }}
+          selectFunction={() => {
+            this.setState({ modalAddActive: !this.state.modalAddActive });
+          }}
           modalVisible={this.state.modalAddActive}
         />
 
@@ -618,8 +667,15 @@ export default class SellingScreen extends React.Component {
           subtitle="Выберите пользователя:"
           modalChecked={this.state.clientId}
           modalItems={this.state.usersItemList}
-          modalCallBack={(val) => this.setState({ clientName: val.CLIENT, clientId: val.CLIENTID }, () => this._addClient())}
-          selectFunction={() => { this.setState({ modalUserVisible: !this.state.modalUserVisible }); }}
+          modalCallBack={(val) =>
+            this.setState(
+              { clientName: val.CLIENT, clientId: val.CLIENTID },
+              () => this._addClient()
+            )
+          }
+          selectFunction={() => {
+            this.setState({ modalUserVisible: !this.state.modalUserVisible });
+          }}
           modalVisible={this.state.modalUserVisible}
         />
 
@@ -627,8 +683,15 @@ export default class SellingScreen extends React.Component {
           subtitle="Выберите скидку:"
           modalChecked={this.state.discountId}
           modalItems={this.state.discountList}
-          modalCallBack={(val) => this.setState({ discountName: val.NAME, discountId: val.DISCOUNTID }, () => this._addDiscount())}
-          selectFunction={() => { this.setState({ modalDiscountVisible: false }); }}
+          modalCallBack={(val) =>
+            this.setState(
+              { discountName: val.NAME, discountId: val.DISCOUNTID },
+              () => this._addDiscount()
+            )
+          }
+          selectFunction={() => {
+            this.setState({ modalDiscountVisible: false });
+          }}
           modalVisible={this.state.modalDiscountVisible}
         />
 
@@ -639,36 +702,38 @@ export default class SellingScreen extends React.Component {
           totalPrice={this.state.totalPrice}
           incomePayments={this.state.incomePayments}
           modalCallBack={(val) => this.setState({ paymentid: val.PAYMENTID })}
-          selectFunction={() => { }}
-          addPayment={(val) => { this._addPayment(val) }}
-          modalClose={() => { this.setState({ modalPayTypeVisible: false }) }}
+          selectFunction={() => {}}
+          addPayment={(val) => {
+            this._addPayment(val);
+          }}
+          modalClose={() => {
+            this.setState({ modalPayTypeVisible: false });
+          }}
           modalVisible={this.state.modalPayTypeVisible}
         />
-
-
-
 
         <UiModalSelect
           list={this.state.optionList}
           modalActive={this.state.modalAdditionalActive}
           modalClose={() => this.setState({ modalAdditionalActive: false })}
           onPress={(val) => {
-
             this.setState({ modalAdditionalActive: false });
-            if (val == 0) this.setState({ showModalTotalPrice: true })
+            if (val == 0) this.setState({ showModalTotalPrice: true });
             if (val == 1) this._removeAll();
             if (val == 2) this.setState({ modalUserVisible: true });
             if (val == 3) this.setState({ modalDiscountVisible: true });
-
           }}
           title=""
         />
 
         <Dialog.Container visible={this.state.showModalCount}>
-          <Dialog.Title style={{ color: "#000" }}>Введите кол-во товара</Dialog.Title>
+          <Dialog.Title style={{ color: "#000" }}>
+            Введите кол-во товара
+          </Dialog.Title>
           <Dialog.Input
             style={{ color: "#000" }}
-            keyboardType='numeric' o
+            keyboardType="numeric"
+            o
             onChangeText={(value) => {
               this.setState({ amount: value });
             }}
@@ -678,21 +743,26 @@ export default class SellingScreen extends React.Component {
               });
             }}
           />
-          <Dialog.Button label="Ok" onPress={() => {
-            this.setState({ showModalCount: false }, () => {
-              this._insertProduct();
-            });
-          }} />
+          <Dialog.Button
+            label="Ok"
+            onPress={() => {
+              this.setState({ showModalCount: false }, () => {
+                this._insertProduct();
+              });
+            }}
+          />
         </Dialog.Container>
 
         <Dialog.Container visible={this.state.showModalCount2}>
-          <Dialog.Title style={{ color: "#ccc" }}>Введите кол-во товара</Dialog.Title>
+          <Dialog.Title style={{ color: "#ccc" }}>
+            Введите кол-во товара
+          </Dialog.Title>
           <Dialog.Input
             style={{ color: "#000" }}
-            keyboardType='numeric'
+            keyboardType="numeric"
             value={this.state.changeAmount}
             onChangeText={(value) => {
-              console.log(value)
+              console.log(value);
               this.setState({ changeAmount: value });
             }}
             onSubmitEditing={() => {
@@ -701,125 +771,145 @@ export default class SellingScreen extends React.Component {
               });
             }}
           />
-          <Dialog.Button label="Ok" onPress={() => {
-            this.setState({ showModalCount2: false }, () => {
-              this._updateProduct();
-            });
-          }} />
+          <Dialog.Button
+            label="Ok"
+            onPress={() => {
+              this.setState({ showModalCount2: false }, () => {
+                this._updateProduct();
+              });
+            }}
+          />
         </Dialog.Container>
 
-
         <Dialog.Container visible={this.state.showModalTotalPrice}>
-          <Dialog.Title style={{ color: "#000" }}>Введите цену букета</Dialog.Title>
+          <Dialog.Title style={{ color: "#000" }}>
+            Введите цену букета
+          </Dialog.Title>
           <Dialog.Input
             style={{ color: "#000" }}
-            keyboardType='numeric'
+            keyboardType="numeric"
             value={this.state.changeAmount2}
             onSubmitEditing={() => {
               this.setState({ showModalTotalPrice: false }, () => {
-                setTotal(this.state.network.ip, this.state.checkid, this.state.changeAmount2).then((val) => {
+                setTotal(
+                  this.state.network.ip,
+                  this.state.checkid,
+                  this.state.changeAmount2
+                ).then((val) => {
                   console.log("setTotal val", val);
                   this.setState({
                     totalUserPrice: this.state.changeAmount2,
                     totalPrice: this.state.changeAmount2,
                   });
 
-                  refreshInfo(this.state.network.ip, this.state.checkid).then((inf) => {
-                    console.log("info", inf)
-                    if (inf.result) {
-                      let arr = [];
-                      inf.result.map((item) => {
-                        arr.push({
-                          id: item.CHECKITEMID,
-                          title: item.NAME,
-                          num: item.AMOUNT,
-                          price: item.PRICE
+                  refreshInfo(this.state.network.ip, this.state.checkid).then(
+                    (inf) => {
+                      console.log("info", inf);
+                      if (inf.result) {
+                        let arr = [];
+                        inf.result.map((item) => {
+                          arr.push({
+                            id: item.CHECKITEMID,
+                            title: item.NAME,
+                            num: item.AMOUNT,
+                            price: item.PRICE,
+                          });
                         });
-                      })
-                      this.setState({
-                        bouquetList: arr,
-                      })
-
+                        this.setState({
+                          bouquetList: arr,
+                        });
+                      }
                     }
-                  })
-
-                })
+                  );
+                });
               });
             }}
             onChangeText={(value) => {
               this.setState({ changeAmount2: value });
             }}
           />
-          <Dialog.Button label="Ok" onPress={() => {
-            this.setState({ showModalTotalPrice: false }, () => {
-              setTotal(this.state.network.ip, this.state.checkid, this.state.changeAmount2).then((val) => {
-                console.log("setTotal", val);
-                this.setState({
-                  totalUserPrice: this.state.changeAmount2,
-                  totalPrice: this.state.changeAmount2,
-                })
+          <Dialog.Button
+            label="Ok"
+            onPress={() => {
+              this.setState({ showModalTotalPrice: false }, () => {
+                setTotal(
+                  this.state.network.ip,
+                  this.state.checkid,
+                  this.state.changeAmount2
+                ).then((val) => {
+                  console.log("setTotal", val);
+                  this.setState({
+                    totalUserPrice: this.state.changeAmount2,
+                    totalPrice: this.state.changeAmount2,
+                  });
 
-                refreshInfo(this.state.network.ip, this.state.checkid).then((inf) => {
-                  console.log("info", inf)
-                  if (inf.result) {
-                    let arr = [];
-                    inf.result.map((item) => {
-                      arr.push({
-                        id: item.CHECKITEMID,
-                        title: item.NAME,
-                        num: item.AMOUNT,
-                        price: item.PRICE
-                      });
-                    })
-                    this.setState({
-                      bouquetList: arr,
-                    })
-
-                  }
-                })
-
-              })
-            });
-          }} />
+                  refreshInfo(this.state.network.ip, this.state.checkid).then(
+                    (inf) => {
+                      console.log("info", inf);
+                      if (inf.result) {
+                        let arr = [];
+                        inf.result.map((item) => {
+                          arr.push({
+                            id: item.CHECKITEMID,
+                            title: item.NAME,
+                            num: item.AMOUNT,
+                            price: item.PRICE,
+                          });
+                        });
+                        this.setState({
+                          bouquetList: arr,
+                        });
+                      }
+                    }
+                  );
+                });
+              });
+            }}
+          />
         </Dialog.Container>
 
         <Dialog.Container visible={this.state.showModalInsertPay}>
-          <Dialog.Title style={{ color: "#000" }}>Введите сумму оплаты:</Dialog.Title>
+          <Dialog.Title style={{ color: "#000" }}>
+            Введите сумму оплаты:
+          </Dialog.Title>
           <Dialog.Description style={{ color: "#000" }}>
-            Оплачено: {this.state.incomePayments}p {"\n"}
-            К оплате: {this.state.totalPrice - this.state.incomePayments}p
+            Оплачено: {this.state.incomePayments}p {"\n"}К оплате:{" "}
+            {this.state.totalPrice - this.state.incomePayments}p
           </Dialog.Description>
           <Dialog.Input
             placeholder={"Внесение"}
-            keyboardType='numeric'
+            keyboardType="numeric"
             style={{ color: "#000" }}
             value={this.state.changeAmount3}
-            onSubmitEditing={() => {
-
-            }}
+            onSubmitEditing={() => {}}
             onChangeText={(value) => {
-              if (value <= (this.state.totalPrice - this.state.incomePayments)) {
+              if (value <= this.state.totalPrice - this.state.incomePayments) {
                 this.setState({ changeAmount3: value });
               }
-
             }}
           />
-          <Dialog.Button label="Оплатить" onPress={() => {
-            this._addPayment()
-          }} />
-          <Dialog.Button label="Сменить тип оплаты" onPress={() => {
-            this.setState({ showModalInsertPay: false, modalPayTypeVisible: true }, () => {
-
-            });
-          }} />
-          <Dialog.Button label="Закрыть" onPress={() => {
-            this.setState({ showModalInsertPay: false }, () => {
-
-            });
-          }} />
+          <Dialog.Button
+            label="Оплатить"
+            onPress={() => {
+              this._addPayment();
+            }}
+          />
+          <Dialog.Button
+            label="Сменить тип оплаты"
+            onPress={() => {
+              this.setState(
+                { showModalInsertPay: false, modalPayTypeVisible: true },
+                () => {}
+              );
+            }}
+          />
+          <Dialog.Button
+            label="Закрыть"
+            onPress={() => {
+              this.setState({ showModalInsertPay: false }, () => {});
+            }}
+          />
         </Dialog.Container>
-
-
       </View>
     );
   }

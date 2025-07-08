@@ -107,89 +107,77 @@ export default class LogInScreen extends React.Component {
         checkLicense(
           this.props.navigation.state.params.ip,
           Device.deviceName.replace(/ /i, "-")
-        )
-          .then((lic) => {
-            if (lic.includes("<result>OK</result>")) {
-              checkLoginCourier(
+        ).then((lic) => {
+          checkLoginCourier(
+            this.props.navigation.state.params.ip,
+            this.state.login,
+            this.state.password
+          )
+            .then((res) => {
+              console.log(
+                "checkLoginCourier",
                 this.props.navigation.state.params.ip,
                 this.state.login,
-                this.state.password
-              )
-                .then((res) => {
-                  console.log(
-                    "checkLoginCourier",
-                    this.props.navigation.state.params.ip,
-                    this.state.login,
-                    this.state.password,
-                    res.length,
-                    res
-                  );
+                this.state.password,
+                res.length,
+                res
+              );
 
-                  if (res.length > 0) {
-                    console.log("GO GO GO");
-                    storeData("user", res[0]);
+              if (res.length > 0) {
+                console.log("GO GO GO");
+                storeData("user", res[0]);
 
-                    checkAccess(
-                      this.props.navigation.state.params.ip,
-                      res[0].USERSID
-                    ).then((vls) => {
-                      if (vls.result) {
-                        let obj = {
-                          enter_app: 1,
-                          enter_sel: 1,
-                          enter_assembly: 1,
-                          enter_order: 1,
-                          add_item: 1,
-                          rem_item: 1,
-                          add_sel: 1,
-                          select_client: 1,
-                          add_price: 1,
-                        };
-                        vls.result.map((item) => {
-                          if (item.ACCESSID == 1) obj.enter_app = item.CAN;
-                          if (item.ACCESSID == 8) obj.enter_sel = item.CAN;
-                          if (item.ACCESSID == 82)
-                            obj.enter_assembly = item.CAN;
-                          if (item.ACCESSID == 83) obj.enter_order = item.CAN;
-                          if (item.ACCESSID == 10) obj.add_item = item.CAN;
-                          if (item.ACCESSID == 12) obj.rem_item = item.CAN;
-                          if (item.ACCESSID == 22) obj.add_sel = item.CAN;
-                          if (item.ACCESSID == 19) obj.select_client = item.CAN;
-                          if (item.ACCESSID == 11) obj.add_price = item.CAN;
-                        });
-                        storeData("user_access", obj);
-                        if (obj.enter_app == 1) {
-                          this.setState({ loader: false });
-                          this.props.navigation.navigate("Main");
-                        } else {
-                          this.setState({ loader: false });
-                          Alert.alert("Внимание", "Нет прав на вход !");
-                        }
-                      }
+                checkAccess(
+                  this.props.navigation.state.params.ip,
+                  res[0].USERSID
+                ).then((vls) => {
+                  if (vls.result) {
+                    let obj = {
+                      enter_app: 1,
+                      enter_sel: 1,
+                      enter_assembly: 1,
+                      enter_order: 1,
+                      add_item: 1,
+                      rem_item: 1,
+                      add_sel: 1,
+                      select_client: 1,
+                      add_price: 1,
+                    };
+                    vls.result.map((item) => {
+                      if (item.ACCESSID == 1) obj.enter_app = item.CAN;
+                      if (item.ACCESSID == 8) obj.enter_sel = item.CAN;
+                      if (item.ACCESSID == 82) obj.enter_assembly = item.CAN;
+                      if (item.ACCESSID == 83) obj.enter_order = item.CAN;
+                      if (item.ACCESSID == 10) obj.add_item = item.CAN;
+                      if (item.ACCESSID == 12) obj.rem_item = item.CAN;
+                      if (item.ACCESSID == 22) obj.add_sel = item.CAN;
+                      if (item.ACCESSID == 19) obj.select_client = item.CAN;
+                      if (item.ACCESSID == 11) obj.add_price = item.CAN;
                     });
-                  } else {
-                    this.setState({ loader: false });
-                    Alert.alert("Внимание", "Пользователь не найден !");
+                    storeData("user_access", obj);
+                    if (obj.enter_app == 1) {
+                      this.setState({ loader: false });
+                      this.props.navigation.navigate("Main");
+                    } else {
+                      this.setState({ loader: false });
+                      Alert.alert("Внимание", "Нет прав на вход !");
+                    }
                   }
-                })
-                .catch((error) => {
-                  this.setState({ loader: true });
-                  console.log(error);
-                  Alert.alert(
-                    "Внимание",
-                    "Нет свободных лицензий ! Повторите вход"
-                  );
                 });
-            } else {
-              this.setState({ loader: false });
-              Alert.alert("Внимание", "Нет свободных лицензий !");
-            }
-          })
-          .catch((error) => {
-            this.setState({ loader: true });
-            console.log(error);
-            Alert.alert("Внимание", "Нет свободных лицензий ! Повторите вход");
-          });
+              } else {
+                this.setState({ loader: false });
+                Alert.alert("Внимание", "Пользователь не найден !");
+              }
+            })
+            .catch((error) => {
+              this.setState({ loader: true });
+              console.log(error);
+              Alert.alert(
+                "Внимание",
+                "Нет свободных лицензий ! Повторите вход"
+              );
+            });
+        });
         /*
        
         */
@@ -213,20 +201,17 @@ export default class LogInScreen extends React.Component {
     return (
       <View style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
-          <UiHeader
-            headerText="Авторизация"
-            btnLeft="back"
-            pressLeft={() => this.props.navigation.navigate("Home")}
-          />
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardDismissMode="on-drag"
-            keyboardShouldPersistTaps="handled"
+          <UiHeader headerText="Авторизация" />
+
+          <KeyboardAvoidingView
+            style={styles.content}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 16}
           >
-            <KeyboardAvoidingView
-              style={styles.content}
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 16}
+            <ScrollView
+              contentContainerStyle={styles.scrollContent}
+              keyboardDismissMode="on-drag"
+              keyboardShouldPersistTaps="handled"
             >
               <View style={styles.loginBar}>
                 <View style={styles.logoContainer}>
@@ -319,8 +304,8 @@ export default class LogInScreen extends React.Component {
                   linkLink="Настройки"
                 />
               </View>
-            </KeyboardAvoidingView>
-          </ScrollView>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </SafeAreaView>
 
         {/* modals */}

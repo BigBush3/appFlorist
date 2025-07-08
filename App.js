@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import * as Font from "expo-font";
 import * as Icon from "@expo/vector-icons";
 import { Asset } from "expo-asset";
-import "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import AppNavigator from "./navigation/AppNavigator";
 
@@ -25,9 +25,11 @@ export default class App extends React.Component {
       return <View />;
     } else {
       return (
-        <View style={styles.container}>
-          <AppNavigator />
-        </View>
+        <GestureHandlerRootView style={styles.container}>
+          <View style={styles.container}>
+            <AppNavigator />
+          </View>
+        </GestureHandlerRootView>
       );
     }
   }

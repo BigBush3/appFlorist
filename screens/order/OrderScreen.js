@@ -9,10 +9,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
-import * as Permissions from "expo-permissions";
 import Dialog from "react-native-dialog";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -126,8 +126,8 @@ export default class OrderScreen extends React.Component {
   }
 
   getPermissionAsync = async () => {
-    if (Constants.platform.ios) {
-      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (Platform.OS === "ios") {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           "Sorry, we need camera roll permissions to make this work!"
@@ -509,15 +509,13 @@ export default class OrderScreen extends React.Component {
       allowsEditing: true,
     });
 
-    if (!result.cancelled) {
+    if (!result.canceled) {
       await this._promisedSetState({ loader: true });
-      let uri =
-        Platform.OS === "android"
-          ? result.uri
-          : result.uri.replace("file://", "");
+      let uri = result.assets[0].uri;
+      uri = Platform.OS === "android" ? uri : uri.replace("file://", "");
       console.log(result);
 
-      uploadImageAsync(this.state.network.ip, result.uri)
+      uploadImageAsync(this.state.network.ip, uri)
         .then((res) => {
           console.log("avatart", res);
           this._promisedSetState({ loader: false });

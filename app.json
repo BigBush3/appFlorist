@@ -2,7 +2,7 @@
   "expo": {
     "name": "FloraPoint флорист",
     "slug": "ibmFloristProject",
-    "version": "3.0",
+    "version": "4.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "platforms": [
@@ -24,7 +24,8 @@
       "bundleIdentifier": "ru.ibmflor",
       "supportsTablet": false,
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Это приложение будет дополнительно использовать Face ID или Touch ID, чтобы сохранить логин"
+        "NSFaceIDUsageDescription": "Это приложение будет дополнительно использовать Face ID или Touch ID, чтобы сохранить логин",
+        "NSAppTransportSecurity": { "NSAllowsArbitraryLoads": true }
       }
     },
     "android": {
@@ -42,6 +43,14 @@
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
         }
       ]
     ],
