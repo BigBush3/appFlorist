@@ -58,8 +58,9 @@ import {
   setTotal,
   insertBouquet,
   updateProduct,
+  getPricelist,
 } from "../../services/Check";
-import { getProductsList } from "../../services/Bouquet";
+import { getProductsList, getProductsByPricelist } from "../../services/Bouquet";
 import { newOrder } from "../../services/Orders";
 
 export default class NewOrderScreen extends React.Component {
@@ -99,6 +100,9 @@ export default class NewOrderScreen extends React.Component {
     productsList: [],
     productsBouquetList: [],
     ordersStatusDelivery: [],
+    pricelistList: [],
+    selectedPricelistId: null,
+    selectedPricelistName: "Основной",
 
     settings: {
       keyboardType: 0,
@@ -220,6 +224,23 @@ export default class NewOrderScreen extends React.Component {
               this.setState({ productsBouquetList: res.result, loader: false });
             }
           });
+
+          getPricelist(net.ip).then((res) => {
+            console.log("getPricelist", res);
+            if (res.result && res.result.length > 0) {
+              res.result.map((item) => {
+                item.label = `${item.NAME}`;
+                item.value = item.PRICELISTID;
+              });
+
+              const firstPricelist = res.result[0];
+              this.setState({
+                pricelistList: res.result,
+                selectedPricelistId: firstPricelist.PRICELISTID || firstPricelist.value,
+                selectedPricelistName: firstPricelist.NAME,
+              });
+            }
+          });
         });
       }
     });
@@ -286,6 +307,7 @@ export default class NewOrderScreen extends React.Component {
   }
 
   _insertProduct(itemid, amount, price) {
+    console.log("insertProduct", itemid, amount, price);
     insertProduct(
       this.state.network.ip,
       this.state.CHECKID,
@@ -305,9 +327,10 @@ export default class NewOrderScreen extends React.Component {
   }
 
   _insertBouquet(checkid, bouquetcheckid) {
+    console.log("insertBouquet", checkid, bouquetcheckid);
     insertBouquet(this.state.network.ip, checkid, bouquetcheckid).then(
       (res) => {
-        console.log("insertProduct", res);
+        console.log("insertProductBouquet", res);
 
         refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
           console.log("refreshInfo", info);
@@ -343,16 +366,9 @@ export default class NewOrderScreen extends React.Component {
     ).then((res) => {
       console.log("_updateProduct", res);
 
-      let arr = this.state.ordersList;
-      let _index = 0;
-
-      arr.map((item, index) => {
-        if (item.id == id) _index = index;
-      });
-      arr[_index].num = changeAmount;
-
-      this.setState({
-        ordersList: arr,
+      refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
+        console.log("refreshInfo", info);
+        this.setState({ ordersList: info.result || [] });
       });
     });
   }
@@ -366,6 +382,164 @@ export default class NewOrderScreen extends React.Component {
         this.setState({ ordersList: info.result });
       });
     });
+  }
+
+  updatePricelist = (pricelist, shouldUpdatePrices = false) => {
+    console.log("updatePricelist вызван с параметрами:", { pricelist, shouldUpdatePrices });
+    console.log("Текущее состояние ordersList:", this.state.ordersList);
+    
+    this.setState({ 
+      loader: true,
+      selectedPricelistId: pricelist.PRICELISTID || pricelist.value,
+      selectedPricelistName: pricelist.NAME,
+    });
+
+    this._loadProductsByPricelist(
+      this.state.network.ip, 
+      pricelist.PRICELISTID || pricelist.value,
+      shouldUpdatePrices
+    );
+  }
+
+  _loadProductsByPricelist = (host, pricelistId, shouldUpdatePrices = false) => {
+    console.log("_loadProductsByPricelist вызван с параметрами:", { host, pricelistId, shouldUpdatePrices });
+    console.log("Текущие товары в заказе:", this.state.ordersList);
+    
+    getProductsByPricelist(host, pricelistId)
+      .then((res) => {
+        console.log("getProductsByPricelist response:", res.result ? res.result[0] : res);
+        if (res && res.result) {
+          res.result.map((item) => {
+            item.label = `${item.NAME} руб.`;
+          });
+          this.setState({
+            productsList: res.result,
+            loader: false,
+          });
+
+          console.log("shouldUpdatePrices:", shouldUpdatePrices, "ordersList.length:", this.state.ordersList.length);
+          
+          if (shouldUpdatePrices && this.state.ordersList.length > 0) {
+            console.log("Показываем диалог пересчета цен");
+            Alert.alert(
+              "Смена прайслиста",
+              "Пересчитать цены уже добавленных товаров согласно новому прайслисту?",
+              [
+                {
+                  text: "Нет",
+                  onPress: () => {
+                    console.log("Пользователь отказался от пересчета цен");
+                  },
+                  style: "cancel",
+                },
+                {
+                  text: "Да", 
+                  onPress: () => {
+                    console.log("Пользователь согласился на пересчет цен");
+                    this._updateAllOrderPrices(res.result);
+                  }
+                },
+              ],
+              { cancelable: false }
+            );
+          } else {
+            console.log("Пересчет цен не требуется");
+          }
+        } else {
+          console.log("No result in response:", res);
+          Alert.alert(
+            "Внимание",
+            "Не удалось загрузить товары для выбранного прайслиста"
+          );
+          this.setState({ loader: false });
+        }
+      })
+      .catch((error) => {
+        console.log("Error loading products by pricelist:", error);
+        Alert.alert(
+          "Ошибка",
+          "Не удалось загрузить товары по прайслисту. Проверьте подключение к серверу."
+        );
+        this.setState({ loader: false });
+      });
+  }
+
+  _updateAllOrderPrices = async (newProductsList) => {
+    if (this.state.ordersList.length === 0) return;
+
+    console.log("Начинаем пересчет цен для товаров:", this.state.ordersList);
+    console.log("Новый прайслист:", newProductsList);
+
+    const updatePromises = [];
+
+    for (let i = 0; i < this.state.ordersList.length; i++) {
+      const orderItem = this.state.ordersList[i];
+      console.log("Обрабатываем товар:", orderItem);
+      
+      // Ищем товар в новом прайслисте по названию
+      const updatedProduct = newProductsList.find(
+        (product) => product.NAME === orderItem.NAME
+      );
+
+      console.log("Найден товар в прайслисте:", updatedProduct);
+
+      if (updatedProduct) {
+        const newPrice = parseFloat(updatedProduct.PRICE.toString().replace(",", "."));
+        const currentPrice = parseFloat(orderItem.PRICE.toString().replace(",", "."));
+        
+        console.log(`Сравнение цен для ${orderItem.NAME}: текущая=${currentPrice}, новая=${newPrice}`);
+        
+        if (newPrice !== currentPrice) {
+          console.log(`Обновляем цену товара ${orderItem.NAME}: ${currentPrice} -> ${newPrice}`);
+
+          const amount = parseFloat(orderItem.AMOUNT.toString().replace(",", "."));
+          const total = amount * newPrice;
+
+          console.log(`Параметры для updateProduct: CHECKITEMID=${orderItem.CHECKITEMID}, amount=${amount}, price=${newPrice}, total=${total}`);
+
+          const updatePromise = updateProduct(
+            this.state.network.ip,
+            orderItem.CHECKITEMID,
+            amount,
+            newPrice,
+            total
+          ).then((res) => {
+            console.log("updateProduct успешно выполнен для", orderItem.NAME, res);
+            return res;
+          }).catch((error) => {
+            console.log("Ошибка обновления товара на сервере:", orderItem.NAME, error);
+            throw error;
+          });
+
+          updatePromises.push(updatePromise);
+        } else {
+          console.log(`Цена товара ${orderItem.NAME} не изменилась`);
+        }
+      } else {
+        console.log(`Товар ${orderItem.NAME} не найден в новом прайслисте`);
+      }
+    }
+
+    try {
+      // Ждем завершения всех обновлений
+      await Promise.all(updatePromises);
+      console.log("Все товары обновлены, обновляем информацию о заказе");
+
+      // Обновляем информацию о заказе после всех изменений
+      refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
+        console.log("refreshInfo after price update", info);
+        this.setState({ ordersList: info.result || [] });
+      });
+    } catch (error) {
+      console.log("Ошибка при пересчете цен:", error);
+      Alert.alert("Ошибка", "Не удалось пересчитать цены некоторых товаров");
+      
+      // Все равно обновляем информацию о заказе
+      refreshInfo(this.state.network.ip, this.state.CHECKID).then((info) => {
+        console.log("refreshInfo after error", info);
+        this.setState({ ordersList: info.result || [] });
+      });
+    }
   }
 
   render() {
@@ -590,6 +764,9 @@ export default class NewOrderScreen extends React.Component {
           list={this.state.ordersList}
           productsList={this.state.productsList}
           productsBouquetList={this.state.productsBouquetList}
+          pricelistList={this.state.pricelistList}
+          selectedPricelistId={this.state.selectedPricelistId}
+          updatePricelist={this.updatePricelist}
           modalActive={this.state.modalItemsEditActive}
           modalClose={() => this.setState({ modalItemsEditActive: false })}
           removeFromBouquet={(val) => {

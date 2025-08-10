@@ -34,6 +34,7 @@ import UiSwipeList from "../../components/ui/list/SwipeList";
 import { retrieveData, uploadImageAsync } from "../../services/Storage.js";
 import {
   getProductsList,
+  getProductsByPricelist,
   newBouquet,
   insertProduct,
   removeProduct,
@@ -44,6 +45,7 @@ import {
   addPhoto,
   getProductsInBouquet,
 } from "../../services/Bouquet";
+import { getPricelist } from "../../services/Check";
 
 export default class NewProductScreen extends React.Component {
   static navigationOptions = {
@@ -57,6 +59,7 @@ export default class NewProductScreen extends React.Component {
     modalCategoryVisible: false,
     showModalTotalPrice: false,
     modalAdditionalActive: false,
+    modalPricelistVisible: false,
     activeTab: 0,
     userId: 0,
 
@@ -70,10 +73,14 @@ export default class NewProductScreen extends React.Component {
     changeAmount: 1,
     changeAmount2: 1000,
 
+    selectedPricelistId: null,
+    selectedPricelistName: "Основной",
+
     optionList: [
       { value: 0, label: "Цена букета" },
       { value: 1, label: "Удалить все товары" },
       { value: 2, label: "Добавить фото букета" },
+      { value: 3, label: "Выбрать прайслист" },
     ],
     swipeList: [
       { id: "1", title: "Learn JavaScript", num: 1, price: 2000 },
@@ -82,6 +89,7 @@ export default class NewProductScreen extends React.Component {
     ],
     bouquetList: [],
     productsList: [],
+    pricelistList: [],
     settings: {
       keyboardType: 0,
       leftItems: 0,
@@ -175,13 +183,26 @@ export default class NewProductScreen extends React.Component {
         }
       });
 
-      getProductsList(net.ip, this.state.settings.leftItems).then((res) => {
-        //console.log("getProductsList", res)
-        if (res.result) {
+      getPricelist(net.ip).then((res) => {
+        console.log("getPricelist", res);
+        if (res.result && res.result.length > 0) {
           res.result.map((item) => {
-            item.label = `${item.NAME} руб.`;
+            item.label = `${item.NAME}`;
+            item.value = item.PRICELISTID;
           });
-          this.setState({ productsList: res.result, loader: false });
+
+          const firstPricelist = res.result[0];
+          this.setState({
+            pricelistList: res.result,
+            selectedPricelistId:
+              firstPricelist.PRICELISTID || firstPricelist.value,
+            selectedPricelistName: firstPricelist.NAME,
+          });
+
+          this._loadProductsByPricelist(
+            net.ip,
+            firstPricelist.PRICELISTID || firstPricelist.value
+          );
         }
       });
     });
@@ -278,6 +299,74 @@ export default class NewProductScreen extends React.Component {
     });
   }
 
+  _updateAllBouquetPrices = async (newProductsList) => {
+    if (this.state.bouquetList.length === 0) return;
+
+    let updatedBouquetList = [...this.state.bouquetList];
+    let totalPrice = 0;
+    let hasUpdates = false;
+
+    for (let i = 0; i < updatedBouquetList.length; i++) {
+      const bouquetItem = updatedBouquetList[i];
+      const updatedProduct = newProductsList.find(
+        (product) =>
+          product.NAME === bouquetItem.title ||
+          product.ITEMID === bouquetItem.itemId
+      );
+
+      if (updatedProduct) {
+        const newPrice = parseFloat(updatedProduct.PRICE);
+        if (newPrice !== parseFloat(bouquetItem.price)) {
+          hasUpdates = true;
+          console.log(`Обновляем цену товара ${bouquetItem.title}: ${bouquetItem.price} -> ${newPrice}`);
+
+          try {
+            const res = await updateProduct(
+              this.state.network.ip,
+              bouquetItem.id,
+              bouquetItem.num,
+              newPrice,
+              bouquetItem.num * newPrice
+            );
+            console.log("updateProduct price for pricelist change", res);
+
+            updatedBouquetList[i] = {
+              ...bouquetItem,
+              price: newPrice,
+            };
+          } catch (error) {
+            console.log("Ошибка обновления товара на сервере:", error);
+          }
+        }
+      }
+    }
+
+    updatedBouquetList.forEach((item) => {
+      totalPrice += parseFloat(item.price) * parseFloat(item.num);
+    });
+
+    let updatedState = {
+      bouquetList: updatedBouquetList,
+      totalPrice: totalPrice,
+      loader: false,
+    };
+
+    if (this.state.selectedProduct) {
+      const updatedSelectedProduct = newProductsList.find(
+        (product) =>
+          product.NAME === this.state.selectedProduct.NAME ||
+          product.ITEMID === this.state.selectedProduct.ITEMID
+      );
+
+      if (updatedSelectedProduct) {
+        updatedState.price = parseFloat(updatedSelectedProduct.PRICE);
+        updatedState.selectedProduct = updatedSelectedProduct;
+      }
+    }
+
+    this.setState(updatedState);
+  };
+
   _pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -317,7 +406,13 @@ export default class NewProductScreen extends React.Component {
     this.setState({ loader: true });
     dontSave(this.state.network.ip, this.state.checkid, this.state.userId).then(
       (res) => {
-        this.setState({ bouquetList: [], loader: false });
+        this.setState({
+          bouquetList: [],
+          loader: false,
+          totalPrice: 0,
+          selectedPricelistId: null,
+          selectedPricelistName: "Основной",
+        });
         this.props.navigation.navigate("Main");
       }
     );
@@ -327,7 +422,13 @@ export default class NewProductScreen extends React.Component {
     this.setState({ loader: true });
     save(this.state.network.ip, this.state.checkid, this.state.CheckName).then(
       (res) => {
-        this.setState({ bouquetList: [], loader: false });
+        this.setState({
+          bouquetList: [],
+          loader: false,
+          totalPrice: 0,
+          selectedPricelistId: null,
+          selectedPricelistName: "Основной",
+        });
         this.props.navigation.navigate("Main");
       }
     );
@@ -341,6 +442,93 @@ export default class NewProductScreen extends React.Component {
       });
     });
     this.setState({ bouquetList: [] });
+  }
+
+  _selectPricelist() {
+    console.log("_selectPricelist", this.state.selectedPricelistId);
+    this.setState({ loader: true });
+
+    this._loadProductsByPricelist(
+      this.state.network.ip,
+      this.state.selectedPricelistId
+    );
+    this.setState({ modalPricelistVisible: false });
+  }
+
+  _loadProductsByPricelist(host, pricelistId) {
+    getProductsByPricelist(host, pricelistId)
+      .then((res) => {
+        console.log(
+          "getProductsByPricelist response:",
+          res.result ? res.result[0] : res
+        );
+        if (res && res.result) {
+          res.result.map((item) => {
+            item.label = `${item.NAME} руб.`;
+          });
+          this.setState({
+            productsList: res.result,
+            loader: false,
+          });
+
+          if (this.state.bouquetList.length > 0) {
+            Alert.alert(
+              "Смена прайслиста",
+              "Пересчитать цены уже добавленных товаров согласно новому прайслисту?",
+              [
+                {
+                  text: "Нет",
+                  onPress: () => {
+                    this._updateSelectedProductPrice(res.result);
+                  },
+                  style: "cancel",
+                },
+                {
+                  text: "Да", 
+                  onPress: () => {
+                    this._updateAllBouquetPrices(res.result);
+                  }
+                },
+              ],
+              { cancelable: false }
+            );
+          } else {
+            this._updateSelectedProductPrice(res.result);
+          }
+        } else {
+          console.log("No result in response:", res);
+          Alert.alert(
+            "Внимание",
+            "Не удалось загрузить товары для выбранного прайслиста"
+          );
+          this.setState({ loader: false });
+        }
+      })
+      .catch((error) => {
+        console.log("Error loading products by pricelist:", error);
+        Alert.alert(
+          "Ошибка",
+          "Не удалось загрузить товары по прайслисту. Проверьте подключение к серверу."
+        );
+        this.setState({ loader: false });
+      });
+  }
+
+  _updateSelectedProductPrice(newProductsList) {
+    if (!this.state.selectedProduct) return;
+
+    const updatedSelectedProduct = newProductsList.find(
+      (product) =>
+        product.NAME === this.state.selectedProduct.NAME ||
+        product.ITEMID === this.state.selectedProduct.ITEMID
+    );
+
+    if (updatedSelectedProduct) {
+      this.setState({
+        price: parseFloat(updatedSelectedProduct.PRICE),
+        selectedProduct: updatedSelectedProduct,
+      });
+    }
   }
 
   render() {
@@ -392,6 +580,12 @@ export default class NewProductScreen extends React.Component {
                       Сумма:{" "}
                       <Text style={styles.infoTextMark}>
                         {this.state.totalPrice} руб.
+                      </Text>
+                    </Text>
+                    <Text style={styles.infoText}>
+                      Прайслист:{" "}
+                      <Text style={styles.infoTextMark}>
+                        {this.state.selectedPricelistName}
                       </Text>
                     </Text>
                   </View>
@@ -477,8 +671,28 @@ export default class NewProductScreen extends React.Component {
             if (val == 0) this.setState({ showModalTotalPrice: true });
             if (val == 1) this._removeAll();
             if (val == 2) this._pickImage();
+            if (val == 3) this.setState({ modalPricelistVisible: true });
           }}
           title=""
+        />
+
+        <UiModalRadio
+          subtitle="Выберите прайслист:"
+          modalChecked={this.state.selectedPricelistId}
+          modalItems={this.state.pricelistList}
+          modalCallBack={(val) =>
+            this.setState(
+              {
+                selectedPricelistName: val.NAME,
+                selectedPricelistId: val.PRICELISTID || val.value,
+              },
+              () => this._selectPricelist()
+            )
+          }
+          selectFunction={() => {
+            this.setState({ modalPricelistVisible: false });
+          }}
+          modalVisible={this.state.modalPricelistVisible}
         />
 
         <Dialog.Container visible={this.state.showModalCount}>
@@ -558,6 +772,7 @@ export default class NewProductScreen extends React.Component {
                         console.log(item);
                         arr.push({
                           id: item.CHECKITEMID,
+                          itemId: item.ITEMID,
                           title: item.NAME,
                           num: parseFloat(item.AMOUNT.replace(",", ".")),
                           price: parseFloat(item.PRICE.replace(",", ".")),

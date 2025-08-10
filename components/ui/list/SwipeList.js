@@ -7,11 +7,7 @@ import {
   View,
 } from "react-native";
 
-import {
-  RectButton,
-  GestureHandlerRootView,
-  Swipeable,
-} from "react-native-gesture-handler";
+import { RectButton, Swipeable } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 
 import Colors from "../../../constants/Colors";
@@ -21,18 +17,18 @@ const Separator = () => <View style={styles.itemSeparator} />;
 const RightSwipeActions = (props) => {
   return (
     <View style={styles.swipeRightWrap}>
-      <TouchableOpacity
+      <RectButton
         onPress={props.onEdit}
         style={[styles.swipeButton, { backgroundColor: Colors.grayColor }]}
       >
         <Ionicons name="pencil" size={24} color={Colors.whiteColor} />
-      </TouchableOpacity>
-      <TouchableOpacity
+      </RectButton>
+      <RectButton
         onPress={props.onDelete}
         style={[styles.swipeButton, { backgroundColor: Colors.redColor }]}
       >
         <Ionicons name="trash-outline" size={24} color={Colors.whiteColor} />
-      </TouchableOpacity>
+      </RectButton>
     </View>
   );
 };
@@ -69,11 +65,17 @@ const UiSwipeList = (props) => {
   return (
     <FlatList
       data={props.swipeList}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id.toString()}
       renderItem={({ item }) => (
         <ListItem
-          onEdit={() => props.onEdit(item)}
-          onDelete={() => props.onDelete(item)}
+          onEdit={() => {
+            console.log("Edit pressed for item:", item);
+            props.onEdit(item);
+          }}
+          onDelete={() => {
+            console.log("Delete pressed for item:", item);
+            props.onDelete(item);
+          }}
           {...item}
         />
       )}

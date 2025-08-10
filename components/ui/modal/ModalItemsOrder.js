@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 
 import Dialog from "react-native-dialog";
@@ -20,14 +21,21 @@ import UiButtonGreenOutline from "../../../components/ui/button/ButtonGreenOutli
 import UiSwipeList from "../../../components/ui/list/SwipeList";
 
 import Colors from "../../../constants/Colors";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default class ModalItemsOrder extends React.Component {
   state = {
-    optionList: [{ value: 0, label: "Цена букета" }],
+    optionMenu: [
+      { value: 0, label: "Цена букета" },
+      { value: 1, label: "Сменить прайслист" },
+    ],
 
     showModalCount2: false,
     modalAddActive: false,
+    modalMenuActive: false,
     showModalTotalPrice: false,
+    modalPricelistVisible: false,
+    modalAddActive2: false,
   };
 
   constructor(props) {
@@ -53,7 +61,6 @@ export default class ModalItemsOrder extends React.Component {
   render() {
     return (
       <Modal
-        coverSreen={false}
         animationType="fade"
         transparent={true}
         visible={this.props.modalActive}
@@ -61,189 +68,228 @@ export default class ModalItemsOrder extends React.Component {
           this.props.modalClose();
         }}
       >
-        <SafeAreaView style={styles.safeArea}>
-          <UiHeader
-            btnLeft="menu"
-            pressLeft={() => this.setState({ showModalTotalPrice: true })}
-            pressRight={() => {
-              this.props.modalClose();
-            }}
-            btnRight="close"
-            headerText="Редактирование состава"
-          />
-          <View style={styles.content}>
-            <ScrollView
-              contentContainerStyle={{ paddingVertical: 16 }}
-              style={styles.scrollView}
-            >
-              <View style={styles.tabContent}>
-                <View style={styles.info}>
-                  <View style={styles.infoWrap}>
-                    <Text style={styles.infoTitle}>Список товаров:</Text>
-                    <UiSwipeList
-                      swipeList={this.convertArrToSwipe(this.props.list)}
-                      onDelete={(id) => this.props.removeFromBouquet(id.id)}
-                      onEdit={(item) => {
-                        console.log(item);
-                        this.setState({
-                          selected: item,
-                          changeAmount: parseFloat(
-                            item.num.toString().replace(",", ".")
-                          ),
-                          showModalCount2: true,
-                        });
-                      }}
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaView style={styles.safeArea}>
+            <UiHeader
+              btnLeft="menu"
+              pressLeft={() => this.setState({ modalMenuActive: true })}
+              pressRight={() => {
+                this.props.modalClose();
+              }}
+              btnRight="close"
+              headerText="Редактирование состава"
+            />
+            <View style={styles.content}>
+              <ScrollView
+                contentContainerStyle={{ paddingVertical: 16 }}
+                style={styles.scrollView}
+                scrollEnabled={true}
+                nestedScrollEnabled={true}
+              >
+                <View style={styles.tabContent}>
+                  <View style={styles.info}>
+                    <View style={styles.infoWrap}>
+                      <Text style={styles.infoTitle}>Список товаров:</Text>
+                      <UiSwipeList
+                        swipeList={this.convertArrToSwipe(this.props.list)}
+                        onDelete={(id) => {
+                          console.log("onDelete called with:", id);
+                          this.props.removeFromBouquet(id.id);
+                        }}
+                        onEdit={(item) => {
+                          console.log("onEdit called with item:", item);
+                          this.setState({
+                            selected: item,
+                            changeAmount: parseFloat(
+                              item.num.toString().replace(",", ".")
+                            ),
+                            showModalCount2: true,
+                          });
+                        }}
+                      />
+                    </View>
+                  </View>
+
+                  <View style={styles.info}>
+                    <UiButtonGreenOutline
+                      gOButtonText="Завершить редактирование"
+                      onPress={() => this.props.modalClose()}
                     />
                   </View>
                 </View>
+              </ScrollView>
 
-                <View style={styles.info}>
-                  <UiButtonGreenOutline
-                    gOButtonText="Завершить редактирование"
-                    onPress={() => this.props.modalClose()}
-                  />
-                </View>
-              </View>
-            </ScrollView>
+              <TouchableOpacity
+                onPress={() => this.setState({ modalAddActive: true })}
+                style={styles.buttonAdd}
+              >
+                <TabBarIcon color={Colors.whiteColor} name="add" />
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
 
-            <TouchableOpacity
-              onPress={() => this.setState({ modalAddActive: true })}
-              style={styles.buttonAdd}
-            >
-              <TabBarIcon color={Colors.whiteColor} name="add" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-
-        <UiModalRadio
-          subtitle="Выбрать букет"
-          modalChecked={[]}
-          modalItems={this.props.productsBouquetList}
-          modalCallBack={(val) => {
-            console.log("Выбрать букет", val);
-            this.props.insertBouquet(val.CHECKID);
-          }}
-          selectFunction={() => {
-            this.setState({ modalAddActive2: !this.state.modalAddActive2 });
-          }}
-          modalVisible={this.state.modalAddActive2}
-        />
-
-        <UiModalRadio
-          subtitle="Выбрать товар:"
-          modalChecked={[]}
-          modalItems={this.props.productsList}
-          modalCallBack={(val) => {
-            console.log(val.PRICE, val);
-            this.setState({
-              selectedProduct: val,
-              itemid: val.ITEMID,
-              price: parseFloat(val.PRICE.toString().replace(",", ".")),
-              showModalCount: true,
-            });
-          }}
-          selectFunction={() => {
-            this.setState({ modalAddActive: !this.state.modalAddActive });
-          }}
-          modalVisible={this.state.modalAddActive}
-        />
-
-        <Dialog.Container visible={this.state.showModalCount}>
-          <Dialog.Title style={{ color: "#000" }}>
-            Введите кол-во товара
-          </Dialog.Title>
-          <Dialog.Input
-            style={{ color: "#000" }}
-            keyboardType="numeric"
-            onChangeText={(value) => {
-              this.setState({ amount: value });
+          <UiModalSelect
+            list={this.state.optionMenu}
+            modalActive={this.state.modalMenuActive}
+            modalClose={() => this.setState({ modalMenuActive: false })}
+            onPress={(val) => {
+              this.setState({ modalMenuActive: false });
+              if (val == 0) this.setState({ showModalTotalPrice: true });
+              if (val == 1) this.setState({ modalPricelistVisible: true });
             }}
-            nSubmitEditing={() => {
-              this.setState({ showModalCount: false }, () => {
-                this.props.insertProduct(
-                  this.state.itemid,
-                  this.state.amount,
-                  this.state.price
-                );
+            title=""
+          />
+
+          <UiModalRadio
+            subtitle="Выбрать букет"
+            modalChecked={[]}
+            modalItems={this.props.productsBouquetList}
+            modalCallBack={(val) => {
+              console.log("Выбрать букет", val);
+              this.props.insertBouquet(val.CHECKID);
+            }}
+            selectFunction={() => {
+              this.setState({ modalAddActive2: !this.state.modalAddActive2 });
+            }}
+            modalVisible={this.state.modalAddActive2}
+          />
+
+          <UiModalRadio
+            subtitle="Выбрать товар"
+            modalChecked={[]}
+            modalItems={this.props.productsList}
+            modalCallBack={(val) => {
+              console.log(val.PRICE, val);
+              this.setState({
+                selectedProduct: val,
+                itemid: val.ITEMID,
+                price: parseFloat(val.PRICE.toString().replace(",", ".")),
+                showModalCount: true,
               });
             }}
-          />
-          <Dialog.Button
-            label="Ok"
-            onPress={() => {
-              this.setState({ showModalCount: false }, () => {
-                this.props.insertProduct(
-                  this.state.itemid,
-                  this.state.amount,
-                  this.state.price
-                );
-              });
+            selectFunction={() => {
+              this.setState({ modalAddActive: !this.state.modalAddActive });
             }}
+            modalVisible={this.state.modalAddActive}
           />
-        </Dialog.Container>
 
-        <Dialog.Container visible={this.state.showModalCount2}>
-          <Dialog.Title style={{ color: "#000" }}>
-            Введите кол-во товара
-          </Dialog.Title>
-          <Dialog.Input
-            style={{ color: "#000" }}
-            keyboardType="numeric"
-            value={this.state.changeAmount}
-            onChangeText={(value) => {
-              console.log(value);
-              this.setState({ changeAmount: value });
-            }}
-            onSubmitEditing={() => {
-              this.setState({ showModalCount2: false }, () => {
-                this.props.updateProduct(
-                  this.state.selected.id,
-                  this.state.changeAmount,
-                  this.state.selected.price
-                );
-              });
-            }}
-          />
-          <Dialog.Button
-            label="Ok"
-            onPress={() => {
-              this.setState({ showModalCount2: false }, () => {
-                this.props.updateProduct(
-                  this.state.selected.id,
-                  this.state.changeAmount,
-                  this.state.selected.price
-                );
-              });
-            }}
-          />
-        </Dialog.Container>
+          <Dialog.Container visible={this.state.showModalCount}>
+            <Dialog.Title style={{ color: "#000" }}>
+              Введите кол-во товара
+            </Dialog.Title>
+            <Dialog.Input
+              style={{ color: "#000" }}
+              keyboardType="numeric"
+              onChangeText={(value) => {
+                this.setState({ amount: value });
+              }}
+              onSubmitEditing={() => {
+                this.setState({ showModalCount: false }, () => {
+                  this.props.insertProduct(
+                    this.state.itemid,
+                    this.state.amount,
+                    this.state.price
+                  );
+                });
+              }}
+            />
+            <Dialog.Button
+              label="Ok"
+              onPress={() => {
+                this.setState({ showModalCount: false }, () => {
+                  this.props.insertProduct(
+                    this.state.itemid,
+                    this.state.amount,
+                    this.state.price
+                  );
+                });
+              }}
+            />
+          </Dialog.Container>
 
-        <Dialog.Container visible={this.state.showModalTotalPrice}>
-          <Dialog.Title style={{ color: "#000" }}>
-            Введите цену букета
-          </Dialog.Title>
-          <Dialog.Input
-            style={{ color: "#000" }}
-            keyboardType="numeric"
-            value={this.state.changeAmount2}
-            onSubmitEditing={() => {
-              this.setState({ showModalTotalPrice: false }, () => {
-                this.props.setTotal(this.state.changeAmount2);
-              });
+          <Dialog.Container visible={this.state.showModalCount2}>
+            <Dialog.Title style={{ color: "#000" }}>
+              Введите кол-во товара
+            </Dialog.Title>
+            <Dialog.Input
+              style={{ color: "#000" }}
+              keyboardType="numeric"
+              value={this.state.changeAmount}
+              onChangeText={(value) => {
+                console.log(value);
+                this.setState({ changeAmount: value });
+              }}
+              onSubmitEditing={() => {
+                this.setState({ showModalCount2: false }, () => {
+                  this.props.updateProduct(
+                    this.state.selected.id,
+                    this.state.changeAmount,
+                    this.state.selected.price
+                  );
+                });
+              }}
+            />
+            <Dialog.Button
+              label="Ok"
+              onPress={() => {
+                this.setState({ showModalCount2: false }, () => {
+                  this.props.updateProduct(
+                    this.state.selected.id,
+                    this.state.changeAmount,
+                    this.state.selected.price
+                  );
+                });
+              }}
+            />
+          </Dialog.Container>
+
+          <Dialog.Container visible={this.state.showModalTotalPrice}>
+            <Dialog.Title style={{ color: "#000" }}>
+              Введите цену букета
+            </Dialog.Title>
+            <Dialog.Input
+              style={{ color: "#000" }}
+              keyboardType="numeric"
+              value={this.state.changeAmount2}
+              onSubmitEditing={() => {
+                this.setState({ showModalTotalPrice: false }, () => {
+                  this.props.setTotal(this.state.changeAmount2);
+                });
+              }}
+              onChangeText={(value) => {
+                this.setState({ changeAmount2: value });
+              }}
+            />
+            <Dialog.Button
+              label="Ok"
+              onPress={() => {
+                this.setState({ showModalTotalPrice: false }, () => {
+                  this.props.setTotal(this.state.changeAmount2);
+                });
+              }}
+            />
+          </Dialog.Container>
+
+          <UiModalRadio
+            subtitle="Выберите прайслист:"
+            modalChecked={this.props.selectedPricelistId}
+            modalItems={this.props.pricelistList || []}
+            modalCallBack={(val) => {
+              console.log("Выбран прайслист:", val);
+              this.setState({ modalPricelistVisible: false });
+
+              if (this.props.updatePricelist) {
+                const shouldUpdatePrices =
+                  this.props.list && this.props.list.length > 0;
+                this.props.updatePricelist(val, shouldUpdatePrices);
+              }
             }}
-            onChangeText={(value) => {
-              this.setState({ changeAmount2: value });
+            selectFunction={() => {
+              this.setState({ modalPricelistVisible: false });
             }}
+            modalVisible={this.state.modalPricelistVisible}
           />
-          <Dialog.Button
-            label="Ok"
-            onPress={() => {
-              this.setState({ showModalTotalPrice: false }, () => {
-                this.props.setTotal(this.state.changeAmount2);
-              });
-            }}
-          />
-        </Dialog.Container>
+        </GestureHandlerRootView>
       </Modal>
     );
   }

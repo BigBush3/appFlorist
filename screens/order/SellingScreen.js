@@ -49,9 +49,13 @@ import {
   addPayment,
   refrashList,
   close,
+  getPricelist,
 } from "../../services/Check";
 import { getClients, searchClient, refreshInfo } from "../../services/Orders";
-import { getProductsList } from "../../services/Bouquet";
+import {
+  getProductsList,
+  getProductsByPricelist,
+} from "../../services/Bouquet";
 
 export default class SellingScreen extends React.Component {
   static navigationOptions = {
@@ -69,6 +73,7 @@ export default class SellingScreen extends React.Component {
     modalUserVisible: false,
     modalPayTypeVisible: false,
     modalDiscountVisible: false,
+    modalPricelistVisible: false,
 
     userId: 0,
     activeTab: 0,
@@ -91,11 +96,15 @@ export default class SellingScreen extends React.Component {
     discountId: 0,
     discountName: null,
 
+    selectedPricelistId: null,
+    selectedPricelistName: "Основной",
+
     optionList: [
       { value: 0, label: "Цена букета" },
       { value: 1, label: "Удалить все товары" },
       { value: 2, label: "Добавить клиента" },
       { value: 3, label: "Добавить скидку" },
+      { value: 4, label: "Выбрать прайслист" },
     ],
 
     swipeList: [],
@@ -105,6 +114,7 @@ export default class SellingScreen extends React.Component {
     usersItemList: [],
     paymentsList: [],
     discountList: [],
+    pricelistList: [],
 
     settings: {
       keyboardType: 0,
@@ -195,15 +205,6 @@ export default class SellingScreen extends React.Component {
         }
       });
 
-      getProductsList(net.ip, this.state.settings.leftItems).then((res) => {
-        if (res.result) {
-          res.result.map((item) => {
-            item.label = `${item.NAME} руб.`;
-          });
-          this.setState({ productsList: res.result, loader: false });
-        }
-      });
-
       bouquetList(net.ip).then((res) => {
         if (res.result) {
           res.result.map((item) => {
@@ -230,6 +231,31 @@ export default class SellingScreen extends React.Component {
           item.value = item.CLIENTID;
         });
         this.setState({ usersItemList: res });
+      });
+
+      getPricelist(net.ip).then((res) => {
+        console.log("getPricelist", res);
+        if (res.result && res.result.length > 0) {
+          res.result.map((item) => {
+            item.label = `${item.NAME}`;
+            item.value = item.PRICELISTID;
+          });
+
+          // Автоматически выбираем первый прайслист
+          const firstPricelist = res.result[0];
+          this.setState({
+            pricelistList: res.result,
+            selectedPricelistId:
+              firstPricelist.PRICELISTID || firstPricelist.value,
+            selectedPricelistName: firstPricelist.NAME,
+          });
+
+          // Загружаем товары с ценами первого прайслиста
+          this._loadProductsByPricelist(
+            net.ip,
+            firstPricelist.PRICELISTID || firstPricelist.value
+          );
+        }
       });
     });
 
@@ -297,6 +323,7 @@ export default class SellingScreen extends React.Component {
       let tPrice = 0;
       arr.push({
         id: _CHECKITEMID,
+        itemId: this.state.selectedProduct.ITEMID, // Сохраняем ITEMID для поиска при смене прайслиста
         title: this.state.selectedProduct.NAME,
         num: this.state.amount,
         price: this.state.price,
@@ -467,6 +494,162 @@ export default class SellingScreen extends React.Component {
     });
   }
 
+  _selectPricelist() {
+    console.log("_selectPricelist", this.state.selectedPricelistId);
+    this.setState({ loader: true });
+
+    this._loadProductsByPricelist(
+      this.state.network.ip,
+      this.state.selectedPricelistId
+    );
+    this.setState({ modalPricelistVisible: false });
+  }
+
+  _loadProductsByPricelist(host, pricelistId) {
+    getProductsByPricelist(host, pricelistId)
+      .then((res) => {
+        console.log(
+          "getProductsByPricelist response:",
+          res.result ? res.result[0] : res
+        );
+        if (res && res.result) {
+          res.result.map((item) => {
+            item.label = `${item.NAME} руб.`;
+          });
+          this.setState({
+            productsList: res.result,
+            loader: false,
+          });
+
+          // Если есть товары в чеке, спрашиваем о пересчете
+          if (this.state.bouquetList.length > 0) {
+            Alert.alert(
+              "Смена прайслиста",
+              "Пересчитать цены уже добавленных товаров согласно новому прайслисту?",
+              [
+                {
+                  text: "Нет",
+                  onPress: () => {
+                    this._updateSelectedProductPrice(res.result);
+                  },
+                  style: "cancel",
+                },
+                {
+                  text: "Да", 
+                  onPress: () => {
+                    this._updateAllBouquetPrices(res.result);
+                  }
+                },
+              ],
+              { cancelable: false }
+            );
+          } else {
+            this._updateSelectedProductPrice(res.result);
+          }
+        } else {
+          console.log("No result in response:", res);
+          Alert.alert(
+            "Внимание",
+            "Не удалось загрузить товары для выбранного прайслиста"
+          );
+          this.setState({ loader: false });
+        }
+      })
+      .catch((error) => {
+        console.log("Error loading products by pricelist:", error);
+        Alert.alert(
+          "Ошибка",
+          "Не удалось загрузить товары по прайслисту. Проверьте подключение к серверу."
+        );
+        this.setState({ loader: false });
+      });
+  }
+
+  _updateAllBouquetPrices = async (newProductsList) => {
+    if (this.state.bouquetList.length === 0) return;
+
+    let updatedBouquetList = [...this.state.bouquetList];
+    let totalPrice = 0;
+    let hasUpdates = false;
+
+    for (let i = 0; i < updatedBouquetList.length; i++) {
+      const bouquetItem = updatedBouquetList[i];
+      const updatedProduct = newProductsList.find(
+        (product) =>
+          product.NAME === bouquetItem.title ||
+          product.ITEMID === bouquetItem.itemId
+      );
+
+      if (updatedProduct) {
+        const newPrice = parseFloat(updatedProduct.PRICE);
+        if (newPrice !== parseFloat(bouquetItem.price)) {
+          hasUpdates = true;
+          console.log(`Обновляем цену товара ${bouquetItem.title}: ${bouquetItem.price} -> ${newPrice}`);
+
+          try {
+            const res = await updateProduct(
+              this.state.network.ip,
+              bouquetItem.id,
+              bouquetItem.num,
+              newPrice,
+              bouquetItem.num * newPrice
+            );
+            console.log("updateProduct price for pricelist change", res);
+
+            updatedBouquetList[i] = {
+              ...bouquetItem,
+              price: newPrice,
+            };
+          } catch (error) {
+            console.log("Ошибка обновления товара на сервере:", error);
+          }
+        }
+      }
+    }
+
+    updatedBouquetList.forEach((item) => {
+      totalPrice += parseFloat(item.price) * parseFloat(item.num);
+    });
+
+    let updatedState = {
+      bouquetList: updatedBouquetList,
+      totalPrice: totalPrice,
+      loader: false,
+    };
+
+    if (this.state.selectedProduct) {
+      const updatedSelectedProduct = newProductsList.find(
+        (product) =>
+          product.NAME === this.state.selectedProduct.NAME ||
+          product.ITEMID === this.state.selectedProduct.ITEMID
+      );
+
+      if (updatedSelectedProduct) {
+        updatedState.price = parseFloat(updatedSelectedProduct.PRICE);
+        updatedState.selectedProduct = updatedSelectedProduct;
+      }
+    }
+
+    this.setState(updatedState);
+  };
+
+  _updateSelectedProductPrice(newProductsList) {
+    if (!this.state.selectedProduct) return;
+
+    const updatedProduct = newProductsList.find(
+      (product) =>
+        product.NAME === this.state.selectedProduct.NAME ||
+        product.ITEMID === this.state.selectedProduct.ITEMID
+    );
+
+    if (updatedProduct) {
+      this.setState({
+        price: parseFloat(updatedProduct.PRICE),
+        selectedProduct: updatedProduct,
+      });
+    }
+  }
+
   _addPayment(changeAmount3) {
     addPayment(
       this.state.network.ip,
@@ -571,6 +754,12 @@ export default class SellingScreen extends React.Component {
                         </Text>
                       </Text>
                     ) : null}
+                    <Text style={styles.infoText}>
+                      Прайслист:{" "}
+                      <Text style={styles.infoTextMark}>
+                        {this.state.selectedPricelistName}
+                      </Text>
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.info}>
@@ -595,7 +784,6 @@ export default class SellingScreen extends React.Component {
                 <View style={styles.info}>
                   <UiButtonGreen
                     gButtonText="Добавить букет"
-                    o
                     onPress={() => this.setState({ modalAddActive2: true })}
                   />
                 </View>
@@ -695,6 +883,25 @@ export default class SellingScreen extends React.Component {
           modalVisible={this.state.modalDiscountVisible}
         />
 
+        <UiModalRadio
+          subtitle="Выберите прайслист:"
+          modalChecked={this.state.selectedPricelistId}
+          modalItems={this.state.pricelistList}
+          modalCallBack={(val) =>
+            this.setState(
+              {
+                selectedPricelistName: val.NAME,
+                selectedPricelistId: val.PRICELISTID || val.value,
+              },
+              () => this._selectPricelist()
+            )
+          }
+          selectFunction={() => {
+            this.setState({ modalPricelistVisible: false });
+          }}
+          modalVisible={this.state.modalPricelistVisible}
+        />
+
         <UiModalRadioPay
           subtitle="Выберите способ оплаты:"
           modalChecked={[]}
@@ -722,6 +929,7 @@ export default class SellingScreen extends React.Component {
             if (val == 1) this._removeAll();
             if (val == 2) this.setState({ modalUserVisible: true });
             if (val == 3) this.setState({ modalDiscountVisible: true });
+            if (val == 4) this.setState({ modalPricelistVisible: true });
           }}
           title=""
         />
@@ -733,11 +941,10 @@ export default class SellingScreen extends React.Component {
           <Dialog.Input
             style={{ color: "#000" }}
             keyboardType="numeric"
-            o
             onChangeText={(value) => {
               this.setState({ amount: value });
             }}
-            nSubmitEditing={() => {
+            onSubmitEditing={() => {
               this.setState({ showModalCount: false }, () => {
                 this._insertProduct();
               });
@@ -810,6 +1017,7 @@ export default class SellingScreen extends React.Component {
                         inf.result.map((item) => {
                           arr.push({
                             id: item.CHECKITEMID,
+                            itemId: item.ITEMID, // Сохраняем ITEMID для поиска при смене прайслиста
                             title: item.NAME,
                             num: item.AMOUNT,
                             price: item.PRICE,
@@ -851,6 +1059,7 @@ export default class SellingScreen extends React.Component {
                         inf.result.map((item) => {
                           arr.push({
                             id: item.CHECKITEMID,
+                            itemId: item.ITEMID,
                             title: item.NAME,
                             num: item.AMOUNT,
                             price: item.PRICE,
