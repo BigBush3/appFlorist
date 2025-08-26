@@ -58,7 +58,6 @@ export default class OrdersScreen extends React.Component {
       if (this.state.ordersList.length == 0) this.setState({ loader: true });
 
       getAvailables(net.ip).then((res) => {
-        //console.log(res);
         if (res.result)
           this.setState({ ordersList: res.result, loader: false });
       });
@@ -97,6 +96,7 @@ export default class OrdersScreen extends React.Component {
     const { navigate } = this.props.navigation;
 
     let list = this._search(this.state.ordersList).map((item, index) => {
+      console.log(item);
       return (
         <UiDocsCard
           key={index}

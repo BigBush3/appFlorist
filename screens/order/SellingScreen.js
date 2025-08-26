@@ -74,6 +74,7 @@ export default class SellingScreen extends React.Component {
     modalPayTypeVisible: false,
     modalDiscountVisible: false,
     modalPricelistVisible: false,
+    showModalCount: false,
 
     userId: 0,
     activeTab: 0,
@@ -535,10 +536,10 @@ export default class SellingScreen extends React.Component {
                   style: "cancel",
                 },
                 {
-                  text: "Да", 
+                  text: "Да",
                   onPress: () => {
                     this._updateAllBouquetPrices(res.result);
-                  }
+                  },
                 },
               ],
               { cancelable: false }
@@ -584,7 +585,9 @@ export default class SellingScreen extends React.Component {
         const newPrice = parseFloat(updatedProduct.PRICE);
         if (newPrice !== parseFloat(bouquetItem.price)) {
           hasUpdates = true;
-          console.log(`Обновляем цену товара ${bouquetItem.title}: ${bouquetItem.price} -> ${newPrice}`);
+          console.log(
+            `Обновляем цену товара ${bouquetItem.title}: ${bouquetItem.price} -> ${newPrice}`
+          );
 
           try {
             const res = await updateProduct(
@@ -838,16 +841,17 @@ export default class SellingScreen extends React.Component {
           modalCallBack={(val) => {
             console.log(val.PRICE, val);
             val.id = val.ITEMID;
+            console.log("showModalCount", this.state.showModalCount);
             this.setState({
+              modalAddActive: !this.state.modalAddActive,
               selectedProduct: val,
               itemid: val.ITEMID,
               price: parseFloat(val.PRICE),
               showModalCount: true,
             });
+            console.log("showModalCount", this.state.showModalCount);
           }}
-          selectFunction={() => {
-            this.setState({ modalAddActive: !this.state.modalAddActive });
-          }}
+          selectFunction={() => {}}
           modalVisible={this.state.modalAddActive}
         />
 

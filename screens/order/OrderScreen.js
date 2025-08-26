@@ -433,7 +433,8 @@ export default class OrderScreen extends React.Component {
       this.state.statusid != "" ? this.state.statusid : "null",
       this.state.data.CREATINGBY != "" ? this.state.data.CREATINGBY : "null",
       this.state.DeliveryStatusId != "" ? this.state.DeliveryStatusId : "null",
-      this.state.DeliveryManId != "" ? this.state.DeliveryManId : "null"
+      this.state.DeliveryManId != "" ? this.state.DeliveryManId : "null",
+      this.state.data.ORDERNAME ? this.state.data.ORDERNAME : "null"
     )
       .then((res) => {
         this.setState({ bouquetList: [], loader: false });
@@ -731,11 +732,21 @@ export default class OrderScreen extends React.Component {
   render() {
     const { navigate } = this.props.navigation;
 
+    let totalSum = 0;
     let ordersList = this.state.ordersList.map((item, index) => {
+      const amount = parseFloat(item.AMOUNT.toString().replace(",", "."));
+      const price = parseFloat(item.PRICE.toString().replace(",", "."));
+      const itemTotal = amount * price;
+      totalSum += itemTotal;
+      
       return (
         <Text style={styles.infoText} key={index}>
           {item.NAME}:{" "}
-          <Text style={styles.infoTextMark}>{parseInt(item.AMOUNT)} шт.</Text>
+          <Text style={styles.infoTextMark}>{amount} шт.</Text>
+          {" x "}
+          <Text style={styles.infoTextMark}>{price} руб.</Text>
+          {" = "}
+          <Text style={styles.infoTextMark}>{itemTotal.toFixed(2)} руб.</Text>
           {this.state.showEdit ? (
             <Text
               style={styles.infoTextRedMark}
@@ -938,6 +949,11 @@ export default class OrderScreen extends React.Component {
                         <View style={styles.infoWrap}>
                           <Text style={styles.infoTitle}>Состав заказа</Text>
                           {ordersList}
+                          {this.state.ordersList && this.state.ordersList.length > 0 ? (
+                            <Text style={[styles.infoText, { marginTop: 12, fontWeight: 'bold' }]}>
+                              Общая сумма товаров: <Text style={styles.infoTextMark}>{totalSum.toFixed(2)} руб.</Text>
+                            </Text>
+                          ) : null}
                         </View>
                       </View>
                       <View style={styles.info}>

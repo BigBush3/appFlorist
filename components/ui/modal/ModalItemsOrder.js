@@ -28,6 +28,7 @@ export default class ModalItemsOrder extends React.Component {
     optionMenu: [
       { value: 0, label: "Цена букета" },
       { value: 1, label: "Сменить прайслист" },
+      { value: 2, label: "Добавить букет" },
     ],
 
     showModalCount2: false,
@@ -136,6 +137,7 @@ export default class ModalItemsOrder extends React.Component {
               this.setState({ modalMenuActive: false });
               if (val == 0) this.setState({ showModalTotalPrice: true });
               if (val == 1) this.setState({ modalPricelistVisible: true });
+              if (val == 2) this.setState({ modalAddActive2: true });
             }}
             title=""
           />

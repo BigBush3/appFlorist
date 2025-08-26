@@ -24,7 +24,7 @@
     "patch-package": "^6.5.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-native": "0.76.9",
+    "react-native": "0.77.0",
     "react-native-barcode-builder": "^2.0.0",
     "react-native-chart-kit": "^6.11.0",
     "react-native-chart-kit-with-pressable-bar-graph": "^6.11.4",

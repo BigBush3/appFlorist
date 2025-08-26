@@ -192,7 +192,7 @@ export const getCoords = (_val) => {
 }
 
 
-export const saveOrder = (_host, orderid, totime, StartTime, EndTime, customer, customerphone, dostavka, receiver, receiverphone, receiveraddress, comment, SiteNum, otkydaid, statusid, CreatingBy, DeliveryStatusId, DeliveryManId) => {
+export const saveOrder = (_host, orderid, totime, StartTime, EndTime, customer, customerphone, dostavka, receiver, receiverphone, receiveraddress, comment, SiteNum, otkydaid, statusid, CreatingBy, DeliveryStatusId, DeliveryManId, OrderName) => {
   //let log = log.toLowerCase().trim();
 
   console.log(
@@ -213,7 +213,8 @@ export const saveOrder = (_host, orderid, totime, StartTime, EndTime, customer, 
       statusid: statusid,
       CreatingBy: CreatingBy,
       DeliveryStatusId: DeliveryStatusId,
-      DeliveryManId: DeliveryManId
+      DeliveryManId: DeliveryManId,
+      OrderName: OrderName
     }
   );
 
@@ -240,7 +241,8 @@ export const saveOrder = (_host, orderid, totime, StartTime, EndTime, customer, 
         statusid: statusid,
         CreatingBy: CreatingBy,
         DeliveryStatusId: DeliveryStatusId,
-        DeliveryManId: DeliveryManId
+        DeliveryManId: DeliveryManId,
+        OrderName: OrderName
       }),
  
     }).then((response) =>   response.json() );

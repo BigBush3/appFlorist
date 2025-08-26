@@ -88,6 +88,7 @@ export default class NewOrderScreen extends React.Component {
     CHECKID: null,
     ORDERID: null,
 
+    orderName: "",
     dostavka: 1,
     DeliveryStatusId: "null",
     receiver: "",
@@ -176,6 +177,7 @@ export default class NewOrderScreen extends React.Component {
               clientId: "",
               customer: "",
               customerphone: "",
+              orderName: "",
               dostavka: 1,
               receiver: "",
               receiveraddress: "",
@@ -289,7 +291,8 @@ export default class NewOrderScreen extends React.Component {
         "null",
         "null",
         this.state.DeliveryStatusId,
-        "null"
+        "null",
+        this.state.orderName // Добавляем OrderName
       )
         .then((res) => {
           console.log("SAVE", res);
@@ -545,13 +548,21 @@ export default class NewOrderScreen extends React.Component {
   render() {
     const { navigate } = this.props.navigation;
 
+    let totalSum = 0;
     let ordersList = this.state.ordersList.map((item, index) => {
+      const amount = parseFloat(item.AMOUNT.toString().replace(",", "."));
+      const price = parseFloat(item.PRICE.toString().replace(",", "."));
+      const itemTotal = amount * price;
+      totalSum += itemTotal;
+      
       return (
         <Text style={styles.infoText} key={index}>
           {item.NAME}:{" "}
-          <Text style={styles.infoTextMark}>
-            {parseFloat(item.AMOUNT.toString().replace(",", "."))} шт.
-          </Text>
+          <Text style={styles.infoTextMark}>{amount} шт.</Text>
+          {" x "}
+          <Text style={styles.infoTextMark}>{price} руб.</Text>
+          {" = "}
+          <Text style={styles.infoTextMark}>{itemTotal.toFixed(2)} руб.</Text>
           {this.state.showEdit ? (
             <Text
               style={styles.infoTextRedMark}
@@ -593,7 +604,10 @@ export default class NewOrderScreen extends React.Component {
                   <View style={styles.infoWrap}>
                     <Text style={styles.infoTitle}>Дата</Text>
                     <TouchableOpacity
-                      onPress={() => this.setState({ modalDate1Visible: true })}
+                      onPress={() => {
+                        console.log("modalDate1Visible");
+                        this.setState({ modalDate1Visible: true })
+                      }}
                     >
                       <UiTextInput
                         placeholder={this.state.date ? this.state.date : "Дата"}
@@ -645,6 +659,16 @@ export default class NewOrderScreen extends React.Component {
                       keyboardType="number-pad"
                       callBack={(val) => {
                         this.setState({ customerphone: val });
+                      }}
+                    />
+
+                    <Text style={styles.infoTitle}>Название заказа</Text>
+
+                    <UiTextInput
+                      placeholder={"Название заказа"}
+                      inputValue={this.state.orderName}
+                      callBack={(val) => {
+                        this.setState({ orderName: val });
                       }}
                     />
                   </View>
@@ -705,6 +729,11 @@ export default class NewOrderScreen extends React.Component {
                   <View style={styles.infoWrap}>
                     <Text style={styles.infoTitle}>Состав заказа</Text>
                     {ordersList}
+                    {this.state.ordersList && this.state.ordersList.length > 0 ? (
+                      <Text style={[styles.infoText, { marginTop: 12, fontWeight: 'bold' }]}>
+                        Общая сумма товаров: <Text style={styles.infoTextMark}>{totalSum.toFixed(2)} руб.</Text>
+                      </Text>
+                    ) : null}
                   </View>
                 </View>
                 <View style={styles.info}>
