@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Alert,
   BackHandler,
   SafeAreaView,
   ScrollView,
@@ -105,13 +106,16 @@ export default class OrdersScreen extends React.Component {
               orderid: item.ORDERID,
             });
           }}
-          address={item.RECEIVERADDRESS}
-          client={item.CUSTOMER}
-          date={item.TOTIME}
-          delivery={item.DOSTAVKA == 1}
+          orderId={item.ORDERID}
           number={item.NUMBER}
-          statusDone={item.ORDERREADY == 1}
-          phone={item.CUSTOMERPHONE}
+          customer={item.CUSTOMER}
+          receiverAddress={item.RECEIVERADDRESS}
+          totalItem={item.TOTALITEM}
+          totalPay={item.TOTALPAY}
+          ostatok={item.OSTATOK}
+          photo={item.PHOTO}
+          orderReady={item.ORDERREADY}
+          host={this.state.network?.ip}
         />
       );
     });
